@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="description" content="スマホで遊べるブロック崩しゲーム、暇をつぶそう。">
+  <title>🦈暇をつぶそう🫧</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{--app-height:100dvh}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none;background:#000;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button{font:inherit}
+    .app{position:fixed;inset:0;width:100vw;height:var(--app-height);background:#000;overflow:hidden}
+    .screen{position:absolute;inset:0;height:var(--app-height);padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 12px);background:#000}
+    .hidden{display:none!important}
+    .home-screen,.score-screen{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .home-card,.score-card{width:min(100%,420px);min-height:calc(var(--app-height) - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin:0 auto;display:flex;flex-direction:column;justify-content:center}
+    .eyebrow{margin:0 0 6px;color:#7dd3fc;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+    h1{margin:0 0 14px;font-size:clamp(2rem,10vw,3.3rem);line-height:1.08}
+    h2{margin:0 0 8px;font-size:1rem}
+    .primary-button,.secondary-button,.pause-button{border:1px solid rgba(255,255,255,.24);border-radius:999px;cursor:pointer;font-weight:800}
+    .primary-button{width:100%;padding:14px 16px;color:#001018;background:linear-gradient(135deg,#67e8f9,#a7f3d0)}
+    .secondary-button{width:100%;padding:13px 16px;color:#fff;background:rgba(255,255,255,.08)}
+    .home-actions,.score-actions{display:grid;gap:10px;margin-top:12px}
+    .name-screen{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .name-card{width:min(100%,420px);min-height:calc(var(--app-height) - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin:0 auto;display:flex;flex-direction:column;justify-content:center}
+    .name-card p{color:rgba(255,255,255,.78);line-height:1.55}
+    .name-input{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;outline:none}
+    .name-input:focus{border-color:#67e8f9}
+    .name-error{min-height:1.4em;margin:8px 0 0;color:#fecaca;font-weight:700}
+    .ranking-card,.score-extra-card{margin-top:14px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.06)}
+    .score-extra-card p,.ranking-card p{margin:6px 0;color:rgba(255,255,255,.82);line-height:1.45;font-size:.92rem}
+    .ranking-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px}
+    .ranking-tab{padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-weight:800}
+    .ranking-tab.active{color:#001018;background:#67e8f9}
+    .ranking-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+    .ranking-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.07);font-size:.9rem}
+    .ranking-empty,.ranking-error,.ranking-status{color:rgba(255,255,255,.75);font-size:.9rem}
+    .score-actions.disabled{display:none}
+    button:disabled{opacity:.55;cursor:not-allowed}
+
+    .best-card,.rule-card,.item-result,.item-guide{margin-top:14px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.06)}
+    .best-card{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .best-card span{color:rgba(255,255,255,.72);font-size:.9rem}
+    .best-card strong{font-size:1.45rem;color:#e0f2fe}
+    .rule-card p,.rule-card li{color:rgba(255,255,255,.78);line-height:1.55;font-size:.92rem}
+    .rule-card p{margin:0 0 8px}.rule-card ul{margin:0;padding-left:1.15em}
+    .item-guide-grid{display:grid;gap:8px}
+    .item-guide-grid p{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:10px;margin:0;color:rgba(255,255,255,.8);line-height:1.4;font-size:.9rem}
+    .item-guide-grid strong{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;color:#001018;background:#e0f2fe;font-size:1.1rem}
+    .game-screen{display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    .game-hud{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:6px;min-height:48px;padding:6px 8px;background:#000;border-bottom:1px solid rgba(255,255,255,.12)}
+    .hud-item span{display:block;color:rgba(255,255,255,.62);font-size:.68rem}
+    .hud-item strong{display:block;font-size:1rem;line-height:1.15}.hud-total{text-align:center}
+    .pause-button{padding:9px 10px;color:#001018;background:#67e8f9;font-size:.75rem}
+    .play-area{position:relative;flex:1 1 auto;min-height:0;background:#000;overflow:hidden;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+    canvas{display:block;width:100%;height:100%;background:#000;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+    .pause-overlay,.countdown-overlay{position:absolute;inset:0;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72);z-index:5}
+    .pause-overlay>div{width:min(100%,320px);display:grid;gap:10px;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:20px;background:rgba(255,255,255,.08);pointer-events:auto}
+    .pause-overlay h2{text-align:center}
+    .countdown-number{font-size:clamp(5rem,26vw,9rem);font-weight:1000;color:#e0f2fe;text-shadow:0 0 26px rgba(103,232,249,.65)}
+    .result-message{margin:0 0 16px;padding:18px 16px;border:1px solid rgba(103,232,249,.42);border-radius:22px;color:#e0f2fe;background:rgba(103,232,249,.12);font-size:clamp(1.8rem,8vw,2.8rem);font-weight:1000;line-height:1.15;text-align:center}
+    .result-list{display:grid;gap:8px;margin:0}
+    .result-list div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.07)}
+    .result-list dt{color:rgba(255,255,255,.72)}.result-list dd{margin:0;font-size:1.2rem;font-weight:900}.result-list.small dd{font-size:1rem}
+    .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);z-index:20;transform:translateX(-50%) translateY(20px);max-width:min(90vw,360px);padding:12px 16px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(8,47,73,.96);color:#e0f2fe;font-weight:800;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .16s ease}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media (max-width:380px),(max-height:680px){
+      .screen{padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 10px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 10px)}
+      h1{margin-bottom:10px;font-size:2rem}.primary-button,.secondary-button{padding:12px 14px}
+      .best-card,.rule-card,.item-result,.item-guide{margin-top:10px;padding:11px}
+      .rule-card p,.rule-card li,.item-guide-grid p{line-height:1.45;font-size:.86rem}
+      .item-guide-grid{gap:6px}.item-guide-grid p{grid-template-columns:30px 1fr}
+      .item-guide-grid strong{width:30px;height:30px;border-radius:10px;font-size:1rem}
+      .game-hud{min-height:44px}.hud-item strong{font-size:.92rem}.pause-button{padding:8px 9px;font-size:.72rem}
+      .result-message{font-size:clamp(1.45rem,7vw,2.2rem);padding:14px 12px}
+    }
+  </style>
+</head>
+<body>
+  <main id="app" class="app">
+    <section id="homeScreen" class="screen home-screen" aria-label="ホーム画面">
+      <div class="home-card">
+        <p class="eyebrow">smartphone browser game</p>
+        <h1>🦈暇をつぶそう🫧</h1>
+
+        <section class="best-card" aria-label="ブラウザ依存の最高スコア">
+          <span>このブラウザの最高スコア</span>
+          <strong id="homeBestScore">0</strong>
+        </section>
+
+        <div class="home-actions">
+          <button id="startGameButton" class="primary-button" type="button">ゲーム開始</button>
+          <button id="shareGameButton" class="secondary-button" type="button">ゲームをシェア</button>
+        </div>
+
+        <section class="rule-card" aria-label="ルール説明">
+          <h2>ルール説明</h2>
+          <p>球をバーで跳ね返して、200個のブロックを壊します。ブロックを壊すと加点され、壁やバーに当たると減点されます。</p>
+          <ul>
+            <li>ブロック破壊: +50pt</li>
+            <li>バーで受け止める: -10pt</li>
+            <li>壁に当たる: -5pt</li>
+            <li>球を1個失うと、残りの球が7秒間2倍サイズ・判定も2倍</li>
+            <li>ゲームは3、2、1のあとに始まります</li>
+            <li>アイテム取得時は🦈または🫧の演出が出ます</li>
+          </ul>
+        </section>
+        <section class="item-guide" aria-label="アイテム説明">
+          <h2>アイテム説明</h2>
+          <div class="item-guide-grid">
+            <p><strong>+</strong><span>球を2個増やす。🦈演出</span></p>
+            <p><strong>x</strong><span>バーが半分になる。🫧演出</span></p>
+            <p><strong>↑</strong><span>バーが1.5倍になる。🦈演出</span></p>
+            <p><strong>⚡</strong><span>球の速度が10秒間1.5倍。取得ごとに10秒加算。🫧演出</span></p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+
+    <section id="nameScreen" class="screen name-screen hidden" aria-label="名前入力画面">
+      <div class="name-card">
+        <p class="eyebrow">player name</p>
+        <h1>名前を入力</h1>
+        <p>ランキングに表示する名前を入力してください。20文字まで使えます。</p>
+        <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="名前を入力">
+        <p id="playerNameError" class="name-error" aria-live="polite"></p>
+        <div class="home-actions">
+          <button id="confirmNameButton" class="primary-button" type="button">この名前で始める</button>
+          <button id="cancelNameButton" class="secondary-button" type="button">戻る</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen hidden" aria-label="ゲーム画面">
+      <header class="game-hud">
+        <div class="hud-item hud-minus"><span>マイナス</span><strong id="minusScore">0</strong></div>
+        <div class="hud-item hud-total"><span>合計</span><strong id="totalScore">0</strong></div>
+        <button id="pauseButton" class="pause-button" type="button">一時停止</button>
+      </header>
+      <div id="playArea" class="play-area">
+        <canvas id="gameCanvas" aria-label="プレイ画面"></canvas>
+        <div id="countdownOverlay" class="countdown-overlay hidden"><div id="countdownNumber" class="countdown-number">3</div></div>
+        <div id="pauseOverlay" class="pause-overlay hidden">
+          <div>
+            <h2>一時停止中</h2>
+            <button id="resumeButton" class="primary-button" type="button">再開</button>
+            <button id="toScoreButton" class="secondary-button" type="button">スコアを見る</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scoreScreen" class="screen score-screen hidden" aria-label="スコア画面">
+      <div class="score-card">
+        <p class="eyebrow">result</p>
+        <h1>スコア</h1>
+        <p id="resultMessage" class="result-message" aria-live="polite"></p>
+        <dl class="result-list">
+          <div><dt>合計スコア</dt><dd id="resultTotal">0</dd></div>
+          <div><dt>壁に当たった回数</dt><dd id="resultWallHits">0</dd></div>
+          <div><dt>受け止めた回数</dt><dd id="resultPaddleCatches">0</dd></div>
+        </dl>
+
+        <section id="scoreSyncCard" class="score-extra-card hidden" aria-label="ランキング送信結果">
+          <h2>ランキング連携</h2>
+          <p id="scoreSyncStatus">送信中です…</p>
+          <div id="scoreSyncDetails" class="hidden">
+            <p>今回スコア：<strong id="syncCurrentScore">0点</strong></p>
+            <p>初回挑戦スコア：<strong id="syncFirstScore">-</strong></p>
+            <p>最高スコア：<strong id="syncBestScore">-</strong></p>
+            <p>プレイ回数：<strong id="syncPlayCount">-</strong></p>
+            <p id="syncBadges"></p>
+          </div>
+        </section>
+
+        <section id="rankingCard" class="ranking-card hidden" aria-label="ランキング">
+          <h2>ランキング</h2>
+          <div class="ranking-tabs" role="tablist" aria-label="ランキング切り替え">
+            <button id="bestRankingTab" class="ranking-tab active" type="button">最高スコア</button>
+            <button id="firstRankingTab" class="ranking-tab" type="button">初挑戦</button>
+          </div>
+          <p id="rankingStatus" class="ranking-status">ランキング取得中です…</p>
+          <ol id="rankingList" class="ranking-list"></ol>
+        </section>
+
+        <section class="item-result">
+          <h2>アイテム取得回数</h2>
+          <dl class="result-list small">
+            <div><dt>球追加</dt><dd id="resultAddBall">0</dd></div>
+            <div><dt>バー半分</dt><dd id="resultShrink">0</dd></div>
+            <div><dt>バー拡大</dt><dd id="resultGrow">0</dd></div>
+            <div><dt>速度1.5倍</dt><dd id="resultSpeed">0</dd></div>
+          </dl>
+        </section>
+        <div class="score-actions">
+          <button id="shareScoreButton" class="secondary-button" type="button">スコアをシェア</button>
+          <button id="restartButton" class="primary-button" type="button">ゲーム再開</button>
+          <button id="finishButton" class="secondary-button" type="button">終了</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">クリップボードにコピーしました</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const GAME_TITLE="暇つぶし";
+    const DISPLAY_GAME_TITLE="🦈暇をつぶそう🫧";
+    const PUBLIC_URL="https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/";
+    const GAME_URL=PUBLIC_URL;
+    const SUPABASE_URL="https://mlpnjgezrnhdxsxolyzj.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM";
+    const GAME_SLUG="nayuta_no_himatsubushi";
+    const CLIENT_VERSION="himatsubushi-ranking-v1";
+    const PLAYER_NAME_KEY="himatsubushi-player-name";
+    const BEST_SCORE_KEY="hima-tsu-bushi-best-score";
+    const screens={home:document.getElementById("homeScreen"),name:document.getElementById("nameScreen"),game:document.getElementById("gameScreen"),score:document.getElementById("scoreScreen")};
+    const startGameButton=document.getElementById("startGameButton"),shareGameButton=document.getElementById("shareGameButton"),confirmNameButton=document.getElementById("confirmNameButton"),cancelNameButton=document.getElementById("cancelNameButton"),playerNameInput=document.getElementById("playerNameInput"),playerNameError=document.getElementById("playerNameError"),pauseButton=document.getElementById("pauseButton"),resumeButton=document.getElementById("resumeButton"),toScoreButton=document.getElementById("toScoreButton"),restartButton=document.getElementById("restartButton"),finishButton=document.getElementById("finishButton"),shareScoreButton=document.getElementById("shareScoreButton"),pauseOverlay=document.getElementById("pauseOverlay"),countdownOverlay=document.getElementById("countdownOverlay"),countdownNumber=document.getElementById("countdownNumber"),playArea=document.getElementById("playArea"),toast=document.getElementById("toast");
+    const homeBestScoreEl=document.getElementById("homeBestScore"),minusScoreEl=document.getElementById("minusScore"),totalScoreEl=document.getElementById("totalScore"),resultMessageEl=document.getElementById("resultMessage"),resultTotalEl=document.getElementById("resultTotal"),resultWallHitsEl=document.getElementById("resultWallHits"),resultPaddleCatchesEl=document.getElementById("resultPaddleCatches"),resultAddBallEl=document.getElementById("resultAddBall"),resultShrinkEl=document.getElementById("resultShrink"),resultGrowEl=document.getElementById("resultGrow"),resultSpeedEl=document.getElementById("resultSpeed"),scoreSyncCard=document.getElementById("scoreSyncCard"),scoreSyncStatus=document.getElementById("scoreSyncStatus"),scoreSyncDetails=document.getElementById("scoreSyncDetails"),syncCurrentScore=document.getElementById("syncCurrentScore"),syncFirstScore=document.getElementById("syncFirstScore"),syncBestScore=document.getElementById("syncBestScore"),syncPlayCount=document.getElementById("syncPlayCount"),syncBadges=document.getElementById("syncBadges"),rankingCard=document.getElementById("rankingCard"),rankingStatus=document.getElementById("rankingStatus"),rankingList=document.getElementById("rankingList"),bestRankingTab=document.getElementById("bestRankingTab"),firstRankingTab=document.getElementById("firstRankingTab");
+    const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
+    const CONFIG={blockCount:200,cols:16,rows:13,blockGap:2,blockTopGap:8,blockSideGap:6,basePaddleWidth:92,paddleHeight:12,paddleBottom:18,minPaddleRate:.25,maxPaddleRate:2,ballRadius:5,baseBallSpeed:5.25,maxBallSpeedRate:4,maxBalls:30,itemSize:20,itemFallSpeed:2.2,addBallBlocks:20,shrinkPaddleBlocks:25,growPaddleBlocks:8,speedUpBlocks:10,normalHpBlocks:145,hard2Blocks:40,hard4Blocks:15,blockBreakScore:50,lostBallBigSeconds:7,speedBoostRate:1.5,speedBoostSeconds:10};
+    const COLORS=["#7dd3fc","#93c5fd","#a7f3d0","#f9a8d4","#fde68a","#c4b5fd","#fdba74","#99f6e4","#fca5a5","#bef264"];
+    const ITEM_LABELS={addBall:"+",shrinkPaddle:"x",growPaddle:"↑",speedUpBall:"⚡"};
+    let view="home",gameState="idle",animationId=null,lastFrameTime=0,countdownTimer=null,toastTimer=null,W=0,H=0,dpr=1,paddle=null,balls=[],blocks=[],items=[],effectParticles=[],plusScore=0,minusScore=0,totalScore=0,wallHits=0,paddleCatches=0,itemCounts={},resultMessage="",ballBoostTimer=0,speedBoostTimer=0,currentPlayerName="",scoreSubmitted=false,scoreSubmitting=false,scoreSubmitResult=null,bestRankingRows=[],firstRankingRows=[],activeRankingType="best";
+
+    function setViewportSize(){const h=Math.round((window.visualViewport&&window.visualViewport.height)||window.innerHeight||document.documentElement.clientHeight||667);document.documentElement.style.setProperty("--app-height",`${h}px`)}
+    function getBestScore(){return Number(localStorage.getItem(BEST_SCORE_KEY)||0)}
+    function setBestScore(score){const best=getBestScore();if(score>best)localStorage.setItem(BEST_SCORE_KEY,String(score));updateBestScoreView()}
+    function updateBestScoreView(){homeBestScoreEl.textContent=String(getBestScore())}
+    function getSavedPlayerName(){try{return localStorage.getItem(PLAYER_NAME_KEY)||""}catch(e){console.error("player name load failed",e);return ""}}
+    function savePlayerName(name){try{localStorage.setItem(PLAYER_NAME_KEY,name)}catch(e){console.error("player name save failed",e)}}
+    function requestGameStart(){
+      const saved=getSavedPlayerName().trim();
+      if(saved){
+        currentPlayerName=saved.slice(0,20);
+        startNewGame();
+        return;
+      }
+      playerNameInput.value="";
+      playerNameError.textContent="";
+      showScreen("name");
+      window.setTimeout(()=>playerNameInput.focus(),80);
+    }
+    function startNewGameAfterNameInput(){
+      if(playerNameInput)playerNameInput.blur();
+      window.setTimeout(()=>{
+        setViewportSize();
+        startNewGame();
+        window.setTimeout(()=>{
+          if(view==="game"){
+            setViewportSize();
+            resizeCanvas();
+            draw();
+          }
+        },260);
+      },320);
+    }
+    function confirmPlayerName(){
+      const name=playerNameInput.value.trim().slice(0,20);
+      if(!name){
+        playerNameError.textContent="名前を入力してください";
+        return;
+      }
+      currentPlayerName=name;
+      savePlayerName(name);
+      startNewGameAfterNameInput();
+    }
+    function createSupabaseClient(){
+      if(!window.supabase||!window.supabase.createClient)throw new Error("Supabase library not loaded");
+      if(!SUPABASE_PUBLISHABLE_KEY||SUPABASE_PUBLISHABLE_KEY.includes("ここに"))throw new Error("Supabase Publishable key is not set");
+      if(!GAME_SLUG||GAME_SLUG.includes("ここに"))throw new Error("GAME_SLUG is not set");
+      return window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    }
+    function formatScore(value){return `${Number(value||0)}点`}
+    function setScoreActionsEnabled(enabled){
+      const actions=document.querySelector(".score-actions");
+      if(actions)actions.classList.toggle("disabled",!enabled);
+      for(const button of [shareScoreButton,restartButton,finishButton]){
+        if(button)button.disabled=!enabled;
+      }
+    }
+    function resetRankingState(){
+      scoreSubmitted=false;
+      scoreSubmitting=false;
+      scoreSubmitResult=null;
+      bestRankingRows=[];
+      firstRankingRows=[];
+      activeRankingType="best";
+      if(scoreSyncCard)scoreSyncCard.classList.add("hidden");
+      if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
+      if(rankingCard)rankingCard.classList.add("hidden");
+      if(rankingList)rankingList.textContent="";
+      setScoreActionsEnabled(true);
+    }
+    function setRankingError(){
+      if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
+      if(scoreSyncStatus)scoreSyncStatus.textContent="ランキング連携に失敗しました😅";
+      if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
+      if(rankingCard)rankingCard.classList.remove("hidden");
+      if(rankingStatus)rankingStatus.textContent="ランキング連携に失敗しました😅";
+      if(rankingList)rankingList.textContent="";
+    }
+    function normalizeRpcRow(data){
+      if(Array.isArray(data))return data[0]||{};
+      return data||{};
+    }
+    async function submitScoreAndLoadRankings(){
+      if(scoreSubmitted||scoreSubmitting)return;
+      scoreSubmitted=true;
+      scoreSubmitting=true;
+      setScoreActionsEnabled(false);
+      if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
+      if(scoreSyncStatus)scoreSyncStatus.textContent="ランキングへ送信中です…";
+      if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
+      if(rankingCard)rankingCard.classList.add("hidden");
+
+      try{
+        const client=createSupabaseClient();
+        const finalScore=totalScore;
+        const {data,error}=await client.rpc("submit_score",{
+          p_display_name: currentPlayerName||getSavedPlayerName()||"名無し",
+          p_game_slug: GAME_SLUG,
+          p_score: finalScore,
+          p_client_version: CLIENT_VERSION
+        });
+        if(error)throw error;
+        scoreSubmitResult=normalizeRpcRow(data);
+        renderScoreSyncResult(finalScore,scoreSubmitResult);
+
+        const bestResult=await client.rpc("get_best_score_ranking",{p_game_slug:GAME_SLUG,p_limit:3});
+        if(bestResult.error)throw bestResult.error;
+        bestRankingRows=Array.isArray(bestResult.data)?bestResult.data:[];
+
+        const firstResult=await client.rpc("get_first_try_ranking",{p_game_slug:GAME_SLUG,p_limit:3});
+        if(firstResult.error)throw firstResult.error;
+        firstRankingRows=Array.isArray(firstResult.data)?firstResult.data:[];
+
+        if(rankingCard)rankingCard.classList.remove("hidden");
+        activeRankingType="best";
+        renderRanking();
+        if(scoreSyncStatus)scoreSyncStatus.textContent="ランキングへ送信しました";
+      }catch(error){
+        console.error("ranking integration failed",error);
+        setRankingError();
+      }finally{
+        scoreSubmitting=false;
+        setScoreActionsEnabled(true);
+      }
+    }
+    function renderScoreSyncResult(finalScore,result){
+      if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
+      if(scoreSyncDetails)scoreSyncDetails.classList.remove("hidden");
+      if(syncCurrentScore)syncCurrentScore.textContent=formatScore(finalScore);
+      if(syncFirstScore)syncFirstScore.textContent=result.result_first_score==null?"-":formatScore(result.result_first_score);
+      if(syncBestScore)syncBestScore.textContent=result.result_best_score==null?"-":formatScore(result.result_best_score);
+      if(syncPlayCount)syncPlayCount.textContent=result.result_play_count==null?"-":`${result.result_play_count}回`;
+      const badges=[];
+      if(result.is_first_play)badges.push("初挑戦スコアを登録しました");
+      if(result.is_new_best)badges.push("自己ベスト更新！");
+      if(syncBadges)syncBadges.textContent=badges.join(" / ");
+    }
+    function renderRanking(){
+      if(!rankingList||!rankingStatus)return;
+      const rows=activeRankingType==="best"?bestRankingRows:firstRankingRows;
+      bestRankingTab.classList.toggle("active",activeRankingType==="best");
+      firstRankingTab.classList.toggle("active",activeRankingType==="first");
+      rankingList.textContent="";
+      if(!rows||rows.length===0){
+        rankingStatus.textContent="ランキングはまだありません";
+        return;
+      }
+      rankingStatus.textContent="";
+      rows.slice(0,3).forEach((row,index)=>{
+        const li=document.createElement("li");
+        const name=document.createElement("span");
+        const score=document.createElement("strong");
+        name.textContent=`${row.rank_no??index+1}位　${row.display_name||row.player_name||"名無し"}`;
+        score.textContent=formatScore(activeRankingType==="best"?(row.best_score??row.score??0):(row.first_score??row.score??0));
+        li.appendChild(name);
+        li.appendChild(score);
+        rankingList.appendChild(li);
+      });
+    }
+    function showScreen(name){view=name;setViewportSize();for(const [key,el] of Object.entries(screens))el.classList.toggle("hidden",key!==name);if(name==="home")updateBestScoreView();if(name==="game"){resizeCanvas();draw()}}
+    function clearGameCache(){sessionStorage.removeItem("hima-tsu-bushi-current-game");localStorage.removeItem("hima-tsu-bushi-current-game")}
+    function clearCountdown(){if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null}countdownOverlay.classList.add("hidden")}
+    function resetStats(){plusScore=0;minusScore=0;totalScore=0;wallHits=0;paddleCatches=0;resultMessage="";ballBoostTimer=0;speedBoostTimer=0;effectParticles=[];items=[];itemCounts={addBall:0,shrinkPaddle:0,growPaddle:0,speedUpBall:0};resetRankingState()}
+    function startNewGame(){clearGameCache();clearCountdown();cancelAnimationFrame(animationId);resetStats();paddle=null;balls=[];blocks=[];items=[];gameState="countdown";pauseOverlay.classList.add("hidden");pauseButton.textContent="一時停止";showScreen("game");resizeCanvas();const w=Math.min(CONFIG.basePaddleWidth,W*.34);paddle={width:w,height:CONFIG.paddleHeight,x:W/2-w/2,y:H-CONFIG.paddleBottom-CONFIG.paddleHeight};balls=[createBall(W/2,paddle.y-14,-.55,-.85)];blocks=createBlocks();updateHud();draw();startCountdown()}
+    function startCountdown(){let count=3;countdownNumber.textContent=String(count);countdownOverlay.classList.remove("hidden");countdownTimer=setInterval(()=>{count-=1;if(count>0){countdownNumber.textContent=String(count);return}clearCountdown();gameState="playing";startLoop()},1000)}
+    function createBall(x,y,nx,ny){const len=Math.hypot(nx,ny)||1;return{x,y,r:CONFIG.ballRadius,vx:nx/len*CONFIG.baseBallSpeed,vy:ny/len*CONFIG.baseBallSpeed}}
+    function createBlocks(){const itemTotal=CONFIG.addBallBlocks+CONFIG.shrinkPaddleBlocks+CONFIG.growPaddleBlocks+CONFIG.speedUpBlocks;const effects=shuffle([...Array(CONFIG.addBallBlocks).fill("addBall"),...Array(CONFIG.shrinkPaddleBlocks).fill("shrinkPaddle"),...Array(CONFIG.growPaddleBlocks).fill("growPaddle"),...Array(CONFIG.speedUpBlocks).fill("speedUpBall"),...Array(CONFIG.blockCount-itemTotal).fill(null)]);const nonItemCount=CONFIG.blockCount-itemTotal;const normalNonItem=Math.max(0,CONFIG.normalHpBlocks-itemTotal);const hps=shuffle([...Array(normalNonItem).fill(1),...Array(CONFIG.hard2Blocks).fill(2),...Array(CONFIG.hard4Blocks).fill(4),...Array(Math.max(0,nonItemCount-normalNonItem-CONFIG.hard2Blocks-CONFIG.hard4Blocks)).fill(1)]);const areaH=Math.min(Math.max(H*.35,150),230);const bw=(W-CONFIG.blockSideGap*2-CONFIG.blockGap*(CONFIG.cols-1))/CONFIG.cols;const bh=Math.max(6,(areaH-CONFIG.blockGap*(CONFIG.rows-1))/CONFIG.rows);let hpIndex=0;return Array.from({length:CONFIG.blockCount},(_,i)=>{const col=i%CONFIG.cols,row=Math.floor(i/CONFIG.cols),effect=effects[i],maxHp=effect?1:hps[hpIndex++];return{x:CONFIG.blockSideGap+col*(bw+CONFIG.blockGap),y:CONFIG.blockTopGap+row*(bh+CONFIG.blockGap),width:bw,height:bh,hp:maxHp,maxHp,effect,pattern:Math.floor(Math.random()*COLORS.length),destroyed:false}})}
+    function startLoop(){cancelAnimationFrame(animationId);lastFrameTime=performance.now();animationId=requestAnimationFrame(loop)}
+    function loop(now){const delta=Math.min(1.5,(now-lastFrameTime)/16.67);lastFrameTime=now;if(gameState==="playing")update(delta);draw();if(view==="game")animationId=requestAnimationFrame(loop)}
+    function update(delta){moveBalls(delta);moveItems(delta);updateVisualEffects(delta);if(ballBoostTimer>0)ballBoostTimer=Math.max(0,ballBoostTimer-delta);if(speedBoostTimer>0)speedBoostTimer=Math.max(0,speedBoostTimer-delta);checkClear();updateHud()}
+    function moveBalls(delta){
+      const beforeCount=balls.length;
+
+      for(const ball of balls){
+        const hitRadius=getBallHitRadius(ball);
+        const speedRate=speedBoostTimer>0?CONFIG.speedBoostRate:1;
+        const moveDist=Math.hypot(ball.vx*delta*speedRate,ball.vy*delta*speedRate);
+        const steps=Math.max(1,Math.ceil(moveDist/Math.max(1,hitRadius)));
+        const dt=delta*speedRate/steps;
+        let wallPenaltyAdded=false;
+        let paddlePenaltyAdded=false;
+
+        for(let s=0;s<steps;s+=1){
+          const radius=getBallHitRadius(ball);
+          ball.prevX=ball.x;
+          ball.prevY=ball.y;
+          ball.x+=ball.vx*dt;
+          ball.y+=ball.vy*dt;
+
+          if(ball.x-radius<=0||ball.x+radius>=W){
+            ball.x=clamp(ball.x,radius,W-radius);
+            ball.vx*=-1;
+            if(!wallPenaltyAdded){
+              addWallPenalty();
+              wallPenaltyAdded=true;
+            }
+          }
+
+          if(ball.y-radius<=0){
+            ball.y=radius;
+            ball.vy*=-1;
+            if(!wallPenaltyAdded){
+              addWallPenalty();
+              wallPenaltyAdded=true;
+            }
+          }
+
+          if(isBallTouchingPaddle(ball)){
+            const hit=(ball.x-paddle.x)/paddle.width-.5;
+            const speed=Math.hypot(ball.vx,ball.vy);
+            ball.vx=hit*speed*1.7;
+            ball.vy=-Math.abs(speed*.92);
+            ball.y=paddle.y-radius-.5;
+
+            if(!paddlePenaltyAdded){
+              paddleCatches+=1;
+              minusScore-=10;
+              updateTotalScore();
+              paddlePenaltyAdded=true;
+            }
+          }
+
+          for(const block of blocks){
+            if(!block.destroyed&&isBallTouchingBlock(ball,block)){
+              hitBlock(ball,block);
+              break;
+            }
+          }
+        }
+      }
+
+      balls=balls.filter(ball=>ball.y-getBallHitRadius(ball)<=H);
+      const lost=beforeCount-balls.length;
+      if(gameState==="playing"&&lost>0&&balls.length>0)ballBoostTimer+=CONFIG.lostBallBigSeconds*60*lost;
+      if(balls.length===0)finishGame()
+    }
+    function moveItems(delta){for(const item of items){item.y+=CONFIG.itemFallSpeed*delta;if(isItemTouchingPaddle(item)){applyItem(item.type);item.active=false}if(item.y>H+item.height)item.active=false}items=items.filter(item=>item.active)}
+    function hitBlock(ball,block){block.hp-=1;bounceBallFromBlock(ball,block);if(block.hp<=0){block.destroyed=true;plusScore+=CONFIG.blockBreakScore;updateTotalScore();if(block.effect)dropItem(block)}}
+    function bounceBallFromBlock(ball,block){
+      const radius=getBallHitRadius(ball);
+      const prevX=typeof ball.prevX==="number"?ball.prevX:ball.x;
+      const prevY=typeof ball.prevY==="number"?ball.prevY:ball.y;
+      const prevBottom=prevY+radius,prevTop=prevY-radius,prevRight=prevX+radius,prevLeft=prevX-radius;
+      const blockBottom=block.y+block.height,blockRight=block.x+block.width;
+      if(prevBottom<=block.y){
+        ball.y=block.y-radius-.5;
+        ball.vy=-Math.abs(ball.vy);
+        return;
+      }
+      if(prevTop>=blockBottom){
+        ball.y=blockBottom+radius+.5;
+        ball.vy=Math.abs(ball.vy);
+        return;
+      }
+      if(prevRight<=block.x){
+        ball.x=block.x-radius-.5;
+        ball.vx=-Math.abs(ball.vx);
+        return;
+      }
+      if(prevLeft>=blockRight){
+        ball.x=blockRight+radius+.5;
+        ball.vx=Math.abs(ball.vx);
+        return;
+      }
+      const pushLeft=Math.abs(ball.x-(block.x-radius));
+      const pushRight=Math.abs(ball.x-(blockRight+radius));
+      const pushTop=Math.abs(ball.y-(block.y-radius));
+      const pushBottom=Math.abs(ball.y-(blockBottom+radius));
+      const minPush=Math.min(pushLeft,pushRight,pushTop,pushBottom);
+      if(minPush===pushLeft){
+        ball.x=block.x-radius-.5;
+        ball.vx=-Math.abs(ball.vx);
+      }else if(minPush===pushRight){
+        ball.x=blockRight+radius+.5;
+        ball.vx=Math.abs(ball.vx);
+      }else if(minPush===pushTop){
+        ball.y=block.y-radius-.5;
+        ball.vy=-Math.abs(ball.vy);
+      }else{
+        ball.y=blockBottom+radius+.5;
+        ball.vy=Math.abs(ball.vy);
+      }
+    }
+    function dropItem(block){items.push({x:block.x+block.width/2-CONFIG.itemSize/2,y:block.y+block.height/2-CONFIG.itemSize/2,width:CONFIG.itemSize,height:CONFIG.itemSize,type:block.effect,active:true})}
+    function applyItem(type){if(!Object.prototype.hasOwnProperty.call(itemCounts,type))itemCounts[type]=0;itemCounts[type]+=1;if(type==="addBall"){const source=balls[0]||createBall(W/2,paddle.y-14,-.55,-.85);addBallFromSource(source);addBallFromSource(source);spawnSharkSweep();return}if(type==="shrinkPaddle"){const minW=CONFIG.basePaddleWidth*CONFIG.minPaddleRate;paddle.width=Math.max(minW,paddle.width*.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnBubbleRise();return}if(type==="growPaddle"){const maxW=CONFIG.basePaddleWidth*CONFIG.maxPaddleRate;paddle.width=Math.min(maxW,paddle.width*1.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnSharkSweep();return}if(type==="speedUpBall"){speedBoostTimer+=CONFIG.speedBoostSeconds*60;spawnBubbleRise()}}
+    function addBallFromSource(source){if(balls.length>=CONFIG.maxBalls)return;const speed=Math.hypot(source.vx,source.vy)||CONFIG.baseBallSpeed;const angle=-Math.PI/2+(Math.random()*1.2-.6);balls.push({x:source.x,y:source.y,r:CONFIG.ballRadius,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed})}
+    function addWallPenalty(){wallHits+=1;minusScore-=5;updateTotalScore()}
+    function updateTotalScore(){totalScore=plusScore+minusScore}
+    function updateHud(){minusScoreEl.textContent=minusScore;totalScoreEl.textContent=totalScore}
+    function finishGame(){if(gameState==="ended")return;clearCountdown();gameState="ended";cancelAnimationFrame(animationId);setBestScore(totalScore);renderScore();showScreen("score");submitScoreAndLoadRankings()}
+    function checkClear(){if(blocks.length>0&&blocks.every(block=>block.destroyed)){resultMessage="暇をつぶせたね🦈🫧";finishGame()}}
+    function renderScore(){updateTotalScore();resultMessageEl.textContent=resultMessage;resultMessageEl.classList.toggle("hidden",resultMessage==="");resultTotalEl.textContent=totalScore;resultWallHitsEl.textContent=wallHits;resultPaddleCatchesEl.textContent=paddleCatches;resultAddBallEl.textContent=itemCounts.addBall||0;resultShrinkEl.textContent=itemCounts.shrinkPaddle||0;resultGrowEl.textContent=itemCounts.growPaddle||0;resultSpeedEl.textContent=itemCounts.speedUpBall||0}
+    function pauseGame(){if(gameState!=="playing")return;gameState="paused";pauseButton.textContent="再開";pauseOverlay.classList.remove("hidden")}
+    function resumeGame(){if(gameState!=="paused")return;gameState="playing";pauseButton.textContent="一時停止";pauseOverlay.classList.add("hidden");startLoop()}
+    function togglePause(){if(gameState==="playing")pauseGame();else if(gameState==="paused")resumeGame()}
+    function draw(){if(!ctx||!paddle||!Array.isArray(blocks))return;ctx.clearRect(0,0,W,H);ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);drawBlocks();drawItems();drawBalls();drawPaddle();drawParticles()}
+    function drawBlocks(){for(const block of blocks){if(block.destroyed)continue;const alpha=.35+.65*(block.hp/block.maxHp);ctx.globalAlpha=alpha;ctx.fillStyle=COLORS[block.pattern];roundRect(block.x,block.y,block.width,block.height,Math.min(5,block.height/2));ctx.globalAlpha=1;if(block.maxHp>1){ctx.fillStyle="rgba(0,0,0,.65)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(String(block.hp),block.x+block.width/2,block.y+block.height/2)}if(block.effect){ctx.fillStyle="#fff";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ITEM_LABELS[block.effect],block.x+block.width/2,block.y+block.height/2)}}}
+    function drawItems(){for(const item of items){ctx.fillStyle="#fff";roundRect(item.x,item.y,item.width,item.height,7);ctx.fillStyle="#000";ctx.font="bold 13px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ITEM_LABELS[item.type],item.x+item.width/2,item.y+item.height/2)}}
+    function getBallHitRadius(ball){return ball.r*(ballBoostTimer>0?2:1)}
+    function drawBalls(){for(const ball of balls){const radius=getBallHitRadius(ball);ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(ball.x,ball.y,radius,0,Math.PI*2);ctx.fill()}}
+    function drawPaddle(){ctx.fillStyle="#67e8f9";roundRect(paddle.x,paddle.y,paddle.width,paddle.height,paddle.height/2)}
+    function spawnBubbleRise(){
+      for(let i=0;i<40;i+=1)effectParticles.push({
+        icon:"🫧",
+        x:Math.random()*W,
+        y:H+Math.random()*15,
+        vx:(-.7+Math.random()*1.4)/2,
+        vy:(-11-Math.random()*8)/3,
+        size:18+Math.random()*12,
+        life:200
+      })
+    }
+
+    function spawnSharkSweep(){
+      for(let i=0;i<40;i+=1)effectParticles.push({
+        icon:"🦈",
+        x:W+Math.random()*20,
+        y:40+Math.random()*Math.max(40,H-80),
+        vx:(-13-Math.random()*9)/3,
+        vy:(-1.4+Math.random()*2.8)/2,
+        size:18+Math.random()*14,
+        life:200
+      })
+    }
+
+    function updateVisualEffects(delta){
+      for(const p of effectParticles){
+        p.x+=p.vx*delta;
+        p.y+=p.vy*delta;
+        p.life-=delta
+      }
+
+      effectParticles=effectParticles.filter(p=>p.life>0&&p.x>-80&&p.x<W+140&&p.y>-100&&p.y<H+140);
+
+      if(effectParticles.length>150){
+        effectParticles.splice(0,effectParticles.length-150)
+      }
+    }
+
+    function drawParticles(){if(effectParticles.length===0)return;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";for(const p of effectParticles){ctx.globalAlpha=Math.max(0,Math.min(1,p.life/30));ctx.font=`${p.size}px system-ui, sans-serif`;ctx.fillText(p.icon,p.x,p.y)}ctx.restore()}
+    function roundRect(x,y,width,height,radius){const r=Math.min(radius,width/2,height/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+width,y,x+width,y+height,r);ctx.arcTo(x+width,y+height,x,y+height,r);ctx.arcTo(x,y+height,x,y,r);ctx.arcTo(x,y,x+width,y,r);ctx.closePath();ctx.fill()}
+    function isBallTouchingPaddle(ball){
+      const radius=getBallHitRadius(ball);
+      return ball.x+radius>=paddle.x&&ball.x-radius<=paddle.x+paddle.width&&ball.y+radius>=paddle.y&&ball.y-radius<=paddle.y+paddle.height&&ball.vy>0
+    }
+    function isItemTouchingPaddle(item){return item.x+item.width>=paddle.x&&item.x<=paddle.x+paddle.width&&item.y+item.height>=paddle.y&&item.y<=paddle.y+paddle.height}
+    function isBallTouchingBlock(ball,block){
+      const radius=getBallHitRadius(ball);
+      const nx=clamp(ball.x,block.x,block.x+block.width),ny=clamp(ball.y,block.y,block.y+block.height),dx=ball.x-nx,dy=ball.y-ny;
+      return dx*dx+dy*dy<=radius*radius
+    }
+    function movePaddleToClientX(clientX){if(!paddle)return;const rect=canvas.getBoundingClientRect();const x=clientX-rect.left;paddle.x=clamp(x-paddle.width/2,0,W-paddle.width)}
+    function resizeCanvas(){setViewportSize();const rect=playArea.getBoundingClientRect();dpr=Math.max(1,Math.min(window.devicePixelRatio||1,2));W=Math.max(300,rect.width||window.innerWidth||320);H=Math.max(360,rect.height||Math.floor(((window.visualViewport&&window.visualViewport.height)||window.innerHeight||667)*.82));canvas.width=Math.floor(W*dpr);canvas.height=Math.floor(H*dpr);canvas.style.width=`${W}px`;canvas.style.height=`${H}px`;ctx.setTransform(dpr,0,0,dpr,0,0);if(paddle){paddle.y=H-CONFIG.paddleBottom-CONFIG.paddleHeight;paddle.x=clamp(paddle.x,0,W-paddle.width)}}
+    function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
+    function shuffle(array){const copied=[...array];for(let i=copied.length-1;i>0;i-=1){const j=Math.floor(Math.random()*(i+1));[copied[i],copied[j]]=[copied[j],copied[i]]}return copied}
+    function preventBrowserGesture(event){if(view==="game")event.preventDefault()}
+    function currentUrl(){return GAME_URL || location.href.split("#")[0]}
+    async function copyText(text,useNativeShare=false){try{if(useNativeShare&&navigator.share){await navigator.share({text});return}if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}else{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");document.body.removeChild(ta)}showToast("クリップボードにコピーしました")}catch(e){if(e&&e.name==="AbortError")return;console.error("share or copy failed",e);showToast("コピーできませんでした")}}
+    function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),1000)}
+    function buildGameShareText(){return `${GAME_TITLE}で遊んでみて！\n${PUBLIC_URL}`}
+    function buildScoreShareText(){const first=scoreSubmitResult&&scoreSubmitResult.result_first_score!=null?`\n初回挑戦スコア：${scoreSubmitResult.result_first_score}点`:"";const best=scoreSubmitResult&&scoreSubmitResult.result_best_score!=null?`\n最高スコア：${scoreSubmitResult.result_best_score}点`:"";return `${GAME_TITLE}で ${totalScore}点！${first}${best}\n${PUBLIC_URL}`}
+    startGameButton.addEventListener("click",requestGameStart);
+    confirmNameButton.addEventListener("click",confirmPlayerName);
+    cancelNameButton.addEventListener("click",()=>showScreen("home"));
+    playerNameInput.addEventListener("keydown",event=>{if(event.key==="Enter")confirmPlayerName()});
+    bestRankingTab.addEventListener("click",()=>{activeRankingType="best";renderRanking()});
+    firstRankingTab.addEventListener("click",()=>{activeRankingType="first";renderRanking()});
+    shareGameButton.addEventListener("click",()=>copyText(buildGameShareText(),true));
+    shareScoreButton.addEventListener("click",()=>copyText(buildScoreShareText(),true));
+    pauseButton.addEventListener("click",togglePause);
+    pauseButton.addEventListener("touchstart",event=>event.stopPropagation(),{passive:true});
+
+    pauseButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    resumeButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    toScoreButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    restartButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    finishButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    shareScoreButton.addEventListener("pointerdown",event=>event.stopPropagation());
+    resumeButton.addEventListener("click",resumeGame);
+
+    toScoreButton.addEventListener("click",()=>{renderScore();showScreen("score")});
+
+    restartButton.addEventListener("click",startNewGame);
+    finishButton.addEventListener("click",()=>{clearGameCache();clearCountdown();cancelAnimationFrame(animationId);gameState="idle";showScreen("home")});
+    window.addEventListener("resize",()=>{setViewportSize();if(view==="game"){resizeCanvas();draw()}});
+    window.addEventListener("orientationchange",()=>{window.setTimeout(()=>{setViewportSize();if(view==="game"){resizeCanvas();draw()}},250)});
+    if(window.visualViewport){
+      window.visualViewport.addEventListener("resize",()=>{
+        window.setTimeout(()=>{
+          setViewportSize();
+          if(view==="game"){
+            resizeCanvas();
+            draw();
+          }
+        },80);
+      });
+    }
+    
+    
+    
+    
+    
+    
+    playArea.addEventListener("pointerdown",event=>{if(event.target.closest("button")||event.target.closest(".pause-overlay"))return;event.preventDefault();movePaddleToClientX(event.clientX)});
+    playArea.addEventListener("pointermove",event=>{if(event.target.closest("button")||event.target.closest(".pause-overlay"))return;event.preventDefault();movePaddleToClientX(event.clientX)});
+    
+    playArea.addEventListener("contextmenu",event=>event.preventDefault());
+    playArea.addEventListener("selectstart",event=>event.preventDefault());
+    playArea.addEventListener("dragstart",event=>event.preventDefault());
+    playArea.addEventListener("touchstart",event=>{if(event.target.closest("button")||event.target.closest(".pause-overlay"))return;event.preventDefault()},{passive:false});
+    playArea.addEventListener("touchmove",event=>{if(event.target.closest("button")||event.target.closest(".pause-overlay"))return;event.preventDefault()},{passive:false});
+    setViewportSize();
+    updateBestScoreView();
+    showScreen("home");
+  </script>
+</body>
+</html>
