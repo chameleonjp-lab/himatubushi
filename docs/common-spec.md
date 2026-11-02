@@ -19,7 +19,9 @@
 
 通常ACKは `accepted / result_normalized_name / result_display_name / result_first_score / result_best_score / result_play_count / is_first_play / is_new_best` の8列です。9列の別wrapperは仮定しません。名前のサーバー比較はU+0020の前後除去のみを扱い、新規入力の点数範囲と既存履歴のint4範囲を区別します。
 
-ACK検証は応答の整合性であり、永続保存のreadback、同名別人の識別、本人認証、冪等性の保証ではありません。ランキング表示には既存の数値文字列変換とscore/name別名fallbackが残り、`rank_no` の修正だけで全スキーマ境界が厳密になったとは説明しません。実通信や本番データでの確認は行っていません。
+ACK検証は応答の整合性であり、永続保存のreadback、同名別人の識別、本人認証、冪等性の保証ではありません。応答にゲームslug自体は返らないため、ゲーム同一性の証明でもありません。実通信や本番データでの確認は行っていません。
+
+ランキング点数の後続修正では、ベスト欄は `best_score`、初回欄は `first_score` だけを採用します。数値型のint4整数（-2147483648〜2147483647）だけを表示し、実際の0・負数はそのまま保持します。null・欠落・数値文字列・真偽値・小数・非有限値・範囲外は `—` で、`score` / 別タブの値で補完しません。通常のゲーム点数表示関数、順位・同点・順序・上限30件、RPC名、ゲーム採点は変更しません。名前の旧別名fallbackと行全体の検証境界は残っており、通常6列全体の厳密なスキーマ検証や本人識別まで完了したとは主張しません。
 
 匿名開始の計測は公開スコア送信と別契約です。このPRで推測した計測エンドポイントやDB変更を追加しません。実験場の集計、匿名ポリシー、本人識別と冪等性は関連PR・契約確認として追跡します。
 
@@ -31,13 +33,14 @@ ACK検証は応答の整合性であり、永続保存のreadback、同名別人
 
 ```sh
 node test/rpc-rank-no.test.cjs
+node test/ranking-score-strict.test.cjs
 node test/normal8-actual-caller.test.cjs
 node test/participation.test.cjs
 node test/online-phase-wiring.test.cjs
 node test/public-stage.test.cjs
 ```
 
-順位24・通常ACK18・参加状態9・オンライン表示phase9の合計60ケースと、固定runtime・インライン一致・実行しない構文検査・15言語77キー・画像pendingの静的5ケースです。元ゲームの主要関数44箇所の保全比較は別途ローカルで実施しましたが、原本スナップショットは公開ファイルに含めません。この検証を実機・全UI・API結合試験やCI成功とは扱いません。
+順位24・厳密な点数境界40・通常ACK18・参加状態9・オンライン表示phase9の合計100ケースと、固定runtime・インライン一致・実行しない構文検査・15言語77キー・画像pendingの静的5ケースです。元ゲームの定数・主要関数などを対象とする44件の保全検査は別途ローカルで実施しますが、原本スナップショットは公開ファイルに含めません。この検証を実機・全UI・API結合試験やCI成功とは扱いません。
 
 ## 公開・連携の残件
 
@@ -46,7 +49,7 @@ node test/public-stage.test.cjs
 - [ ] 実ゲーム画面からサムネイルを作り、OG/Twitterメタ情報を実URLとともに設定。現在は画像・SNSメタ情報がpendingで、架空画像や存在しない画像URLを宣言しません。公開後の修正でも対応できます。
 - [ ] 公開確認後に正式URLを統一。確認前は `https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/` を維持します。
 - [ ] 実験場の既存 `nayuta_no_himatsubushi` エントリーと共有情報を変更する関連PR。ゲーム内は詳細ランキング `ranking.html?game=nayuta_no_himatsubushi` を参照しますが、実験場側変更完了とは扱いません。
-- [ ] 匿名開始の計測契約、実スコア連携、同名別人の識別・冪等性、ランキングscore schemaを確認。
+- [ ] 匿名開始の計測契約、実スコア連携、同名別人の識別・冪等性、実ランキング応答と残る名前・行全体の検証境界を確認。
 - [ ] iPhone Safari縦横・IME・キーボード・音・復帰・X、15言語の自然さと全画面を確認。
 
 戻す必要がある場合はPR親コミットを参照し、ownerが確認したrevertで戻します。既存履歴や保存データを削除せず、DBを巻き戻しません。

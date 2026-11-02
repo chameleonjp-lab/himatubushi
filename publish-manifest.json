@@ -2,7 +2,7 @@
   "repository": "chameleonjp-lab/himatubushi",
   "title": "暇をつぶそう",
   "runtimeFiles": ["index.html"],
-  "runtimeSHA256": "42de8abcee0cc941a2ab0f79a1a710ba43a78abeea2d2a98908267726a8b53f9",
+  "runtimeSHA256": "93475a7b2c7bcd0288056fed22cf93094e6ee91d236a620dded8f9ef4b87eba4",
   "inlineSources": {
     "hima-client": "client-core.cjs",
     "hima-audio": "audio.cjs",

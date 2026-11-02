@@ -1831,8 +1831,7 @@ function validateNormalScoreAck8(data, expected) {
       else if(rankingStatus&&onlineDisplay.rank==="failed")rankingStatus.textContent=translator.t("syncFailed");
     }
     function formatRankingScore(value){
-      const numeric=typeof value==="number"||(typeof value==="string"&&value.trim()!=="");
-      if(!numeric||!Number.isFinite(Number(value)))return translator.t("points",{score:"—"});
+      if(!Number.isInteger(value)||value<-2147483648||value>2147483647)return translator.t("points",{score:"—"});
       return formatScore(value);
     }
     function formatScore(value){return translator.t("points",{score:translator.format(Number(value||0))})}
@@ -1994,7 +1993,7 @@ function validateNormalScoreAck8(data, expected) {
         const name=document.createElement("span");
         const score=document.createElement("strong");
         name.textContent=translator.t("rankName",{rank:Number.isSafeInteger(row.rank_no)&&row.rank_no>0?translator.format(row.rank_no):"—",name:row.display_name||row.player_name||translator.t("unnamed")});
-        score.textContent=formatRankingScore(activeRankingType==="best"?(row.best_score??row.score):(row.first_score??row.score));
+        score.textContent=formatRankingScore(activeRankingType==="best"?row.best_score:row.first_score);
         li.appendChild(name);
         li.appendChild(score);
         rankingList.appendChild(li);
