@@ -1,0 +1,18 @@
+{
+  "repository": "chameleonjp-lab/himatubushi",
+  "title": "暇をつぶそう",
+  "runtimeFiles": ["index.html"],
+  "runtimeSHA256": "93475a7b2c7bcd0288056fed22cf93094e6ee91d236a620dded8f9ef4b87eba4",
+  "inlineSources": {
+    "hima-client": "client-core.cjs",
+    "hima-audio": "audio.cjs",
+    "hima-i18n": "i18n.cjs",
+    "normal-score-ack8": "normal-score-ack8.js",
+    "hima-catalog": "locales.json"
+  },
+  "externalRuntime": ["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"],
+  "thumbnail": {"status": "pending", "reason": "An actual-game screenshot and social metadata will be reviewed after publication. No fabricated image is declared."},
+  "canonicalURL": "https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/",
+  "canonicalSwitch": "Only after the owner merges, Pages publishes and the actual new game URL is verified.",
+  "deployment": "No workflow is added. The owner must confirm the existing Pages source and publication settings before merging."
+}

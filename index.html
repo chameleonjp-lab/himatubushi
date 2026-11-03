@@ -21,6 +21,8 @@
     .primary-button,.secondary-button,.pause-button{border:1px solid rgba(255,255,255,.24);border-radius:999px;cursor:pointer;font-weight:800}
     .primary-button{width:100%;padding:14px 16px;color:#001018;background:linear-gradient(135deg,#67e8f9,#a7f3d0)}
     .secondary-button{width:100%;padding:13px 16px;color:#fff;background:rgba(255,255,255,.08)}
+    .secondary-button.x-share-button{background:#000;color:#fff;min-height:44px}
+    .audioSettings{display:grid;grid-template-columns:minmax(100px,1fr) auto minmax(80px,1fr);gap:8px;align-items:center;margin-top:12px}.audioSettings button,.audioSettings input{min-height:44px;min-width:0}.audioSettings input{width:100%}
     .home-actions,.score-actions{display:grid;gap:10px;margin-top:12px}
     .name-screen{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .name-card{width:min(100%,420px);min-height:calc(var(--app-height) - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin:0 auto;display:flex;flex-direction:column;justify-content:center}
@@ -75,136 +77,1630 @@
       .game-hud{min-height:44px}.hud-item strong{font-size:.92rem}.pause-button{padding:8px 9px;font-size:.72rem}
       .result-message{font-size:clamp(1.45rem,7vw,2.2rem);padding:14px 12px}
     }
+    .languageControl{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .languageControl select{font:inherit;min-height:44px;max-width:100%;background:#fff;color:#111;border:1px solid #64748b;border-radius:8px;padding:8px}
   </style>
 </head>
 <body>
   <main id="app" class="app">
-    <section id="homeScreen" class="screen home-screen" aria-label="ホーム画面">
+    <section id="homeScreen" class="screen home-screen" aria-label="ホーム画面" data-i18n-aria="homeLabel">
       <div class="home-card">
-        <p class="eyebrow">smartphone browser game</p>
+        <div class="languageControl"><label for="homeLanguage" data-i18n="language">言語</label><select id="homeLanguage"></select></div>
+        <p class="eyebrow" data-i18n="browserGame">スマートフォン用ブラウザーゲーム</p>
         <h1>🦈暇をつぶそう🫧</h1>
 
-        <section class="best-card" aria-label="ブラウザ依存の最高スコア">
-          <span>このブラウザの最高スコア</span>
+        <section class="best-card" aria-label="ブラウザ依存の最高スコア" data-i18n-aria="homeBest">
+          <span data-i18n="homeBest">このブラウザの最高スコア</span>
           <strong id="homeBestScore">0</strong>
         </section>
 
+        <label for="playerNameInput" data-i18n="nameLabel">プレイヤー名（任意）</label>
+        <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="20文字以内" data-i18n-placeholder="namePlaceholder" aria-describedby="nameDisclosure">
+        <p id="nameDisclosure" data-i18n="nameDisclosure">名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。</p>
+        <p id="playerNameError" class="name-error" aria-live="polite"></p>
+        <div class="audioSettings">
+          <button id="homeSound" class="secondary-button" type="button" aria-pressed="true">音：オン</button>
+          <label for="homeVolume" data-i18n="volume">音量</label>
+          <input id="homeVolume" type="range" min="0" max="100" step="1" value="50">
+        </div>
         <div class="home-actions">
-          <button id="startGameButton" class="primary-button" type="button">ゲーム開始</button>
-          <button id="shareGameButton" class="secondary-button" type="button">ゲームをシェア</button>
+          <button id="startGameButton" class="primary-button" type="button" data-i18n="start">ゲーム開始</button>
+          <button id="shareGameButton" class="secondary-button x-share-button" type="button" data-i18n="share">Xでシェア</button>
         </div>
 
-        <section class="rule-card" aria-label="ルール説明">
-          <h2>ルール説明</h2>
-          <p>球をバーで跳ね返して、200個のブロックを壊します。ブロックを壊すと加点され、壁やバーに当たると減点されます。</p>
+        <section class="rule-card" aria-label="ルール説明" data-i18n-aria="rulesTitle">
+          <h2 data-i18n="rulesTitle">ルール説明</h2>
+          <p data-i18n="ruleLead">球をバーで跳ね返して、200個のブロックを壊します。ブロックを壊すと加点され、壁やバーに当たると減点されます。</p>
           <ul>
-            <li>ブロック破壊: +50pt</li>
-            <li>バーで受け止める: -10pt</li>
-            <li>壁に当たる: -5pt</li>
-            <li>球を1個失うと、残りの球が7秒間2倍サイズ・判定も2倍</li>
-            <li>ゲームは3、2、1のあとに始まります</li>
-            <li>アイテム取得時は🦈または🫧の演出が出ます</li>
+            <li data-i18n="ruleBlock">ブロック破壊: +50pt</li>
+            <li data-i18n="rulePaddle">バーで受け止める: -10pt</li>
+            <li data-i18n="ruleWall">壁に当たる: -5pt</li>
+            <li data-i18n="ruleLost">球を1個失うと、残りの球が7秒間2倍サイズ・判定も2倍</li>
+            <li data-i18n="ruleStart">ゲームは3、2、1のあとに始まります</li>
+            <li data-i18n="ruleEffect">アイテム取得時は🦈または🫧の演出が出ます</li>
           </ul>
         </section>
-        <section class="item-guide" aria-label="アイテム説明">
-          <h2>アイテム説明</h2>
+        <section class="item-guide" aria-label="アイテム説明" data-i18n-aria="itemsTitle">
+          <h2 data-i18n="itemsTitle">アイテム説明</h2>
           <div class="item-guide-grid">
-            <p><strong>+</strong><span>球を2個増やす。🦈演出</span></p>
-            <p><strong>x</strong><span>バーが半分になる。🫧演出</span></p>
-            <p><strong>↑</strong><span>バーが1.5倍になる。🦈演出</span></p>
-            <p><strong>⚡</strong><span>球の速度が10秒間1.5倍。取得ごとに10秒加算。🫧演出</span></p>
+            <p><strong>+</strong><span data-i18n="itemAdd">球を2個増やす。🦈演出</span></p>
+            <p><strong>x</strong><span data-i18n="itemShrink">バーが半分になる。🫧演出</span></p>
+            <p><strong>↑</strong><span data-i18n="itemGrow">バーが1.5倍になる。🦈演出</span></p>
+            <p><strong>⚡</strong><span data-i18n="itemSpeed">球の速度が10秒間1.5倍。取得ごとに10秒加算。🫧演出</span></p>
           </div>
         </section>
       </div>
     </section>
 
 
-    <section id="nameScreen" class="screen name-screen hidden" aria-label="名前入力画面">
-      <div class="name-card">
-        <p class="eyebrow">player name</p>
-        <h1>名前を入力</h1>
-        <p>ランキングに表示する名前を入力してください。20文字まで使えます。</p>
-        <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" placeholder="名前を入力">
-        <p id="playerNameError" class="name-error" aria-live="polite"></p>
-        <div class="home-actions">
-          <button id="confirmNameButton" class="primary-button" type="button">この名前で始める</button>
-          <button id="cancelNameButton" class="secondary-button" type="button">戻る</button>
-        </div>
-      </div>
-    </section>
+    <section id="nameScreen" class="screen name-screen hidden" aria-hidden="true"></section>
 
-    <section id="gameScreen" class="screen game-screen hidden" aria-label="ゲーム画面">
+    <section id="gameScreen" class="screen game-screen hidden" aria-label="ゲーム画面" data-i18n-aria="gameLabel">
       <header class="game-hud">
-        <div class="hud-item hud-minus"><span>マイナス</span><strong id="minusScore">0</strong></div>
-        <div class="hud-item hud-total"><span>合計</span><strong id="totalScore">0</strong></div>
-        <button id="pauseButton" class="pause-button" type="button">一時停止</button>
+        <div class="hud-item hud-minus"><span data-i18n="hudMinus">マイナス</span><strong id="minusScore">0</strong></div>
+        <div class="hud-item hud-total"><span data-i18n="hudTotal">合計</span><strong id="totalScore">0</strong></div>
+        <button id="pauseButton" class="pause-button" type="button" data-i18n="pause">一時停止</button>
       </header>
       <div id="playArea" class="play-area">
-        <canvas id="gameCanvas" aria-label="プレイ画面"></canvas>
+        <canvas id="gameCanvas" aria-label="プレイ画面" data-i18n-aria="canvasLabel"></canvas>
         <div id="countdownOverlay" class="countdown-overlay hidden"><div id="countdownNumber" class="countdown-number">3</div></div>
         <div id="pauseOverlay" class="pause-overlay hidden">
           <div>
-            <h2>一時停止中</h2>
-            <button id="resumeButton" class="primary-button" type="button">再開</button>
-            <button id="toScoreButton" class="secondary-button" type="button">スコアを見る</button>
+            <h2 data-i18n="paused">一時停止中</h2>
+            <button id="resumeButton" class="primary-button" type="button" data-i18n="resume">再開</button>
+            <button id="toScoreButton" class="secondary-button" type="button" data-i18n="viewScore">スコアを見る</button>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="scoreScreen" class="screen score-screen hidden" aria-label="スコア画面">
+    <section id="scoreScreen" class="screen score-screen hidden" aria-label="スコア画面" data-i18n-aria="scoreLabel">
       <div class="score-card">
-        <p class="eyebrow">result</p>
-        <h1>スコア</h1>
+        <div class="languageControl"><label for="resultLanguage" data-i18n="language">言語</label><select id="resultLanguage"></select></div>
+        <p class="eyebrow" data-i18n="resultLabel">結果</p>
+        <h1 data-i18n="scoreTitle">スコア</h1>
         <p id="resultMessage" class="result-message" aria-live="polite"></p>
         <dl class="result-list">
-          <div><dt>合計スコア</dt><dd id="resultTotal">0</dd></div>
-          <div><dt>壁に当たった回数</dt><dd id="resultWallHits">0</dd></div>
-          <div><dt>受け止めた回数</dt><dd id="resultPaddleCatches">0</dd></div>
+          <div><dt data-i18n="resultTotal">合計スコア</dt><dd id="resultTotal">0</dd></div>
+          <div><dt data-i18n="wallHits">壁に当たった回数</dt><dd id="resultWallHits">0</dd></div>
+          <div><dt data-i18n="paddleCatches">受け止めた回数</dt><dd id="resultPaddleCatches">0</dd></div>
         </dl>
 
-        <section id="scoreSyncCard" class="score-extra-card hidden" aria-label="ランキング送信結果">
-          <h2>ランキング連携</h2>
+        <div class="score-actions">
+          <button id="shareScoreButton" class="secondary-button x-share-button" type="button" data-i18n="share">Xでシェア</button>
+          <button id="restartButton" class="primary-button" type="button" data-i18n="restart">ゲーム再開</button>
+          <button id="finishButton" class="secondary-button" type="button" data-i18n="home">終了</button>
+        </div>
+
+        <section id="scoreSyncCard" class="score-extra-card hidden" aria-label="ランキング送信結果" data-i18n-aria="syncLabel">
+          <h2 data-i18n="syncTitle">ランキング連携</h2>
           <p id="scoreSyncStatus">送信中です…</p>
           <div id="scoreSyncDetails" class="hidden">
-            <p>今回スコア：<strong id="syncCurrentScore">0点</strong></p>
-            <p>初回挑戦スコア：<strong id="syncFirstScore">-</strong></p>
-            <p>最高スコア：<strong id="syncBestScore">-</strong></p>
-            <p>プレイ回数：<strong id="syncPlayCount">-</strong></p>
+            <p><strong id="syncCurrentScore">0点</strong></p>
+            <p><strong id="syncFirstScore">-</strong></p>
+            <p><strong id="syncBestScore">-</strong></p>
+            <p><strong id="syncPlayCount">-</strong></p>
             <p id="syncBadges"></p>
           </div>
         </section>
 
-        <section id="rankingCard" class="ranking-card hidden" aria-label="ランキング">
-          <h2>ランキング</h2>
-          <div class="ranking-tabs" role="tablist" aria-label="ランキング切り替え">
-            <button id="bestRankingTab" class="ranking-tab active" type="button">最高スコア</button>
-            <button id="firstRankingTab" class="ranking-tab" type="button">初挑戦</button>
+        <section id="rankingCard" class="ranking-card hidden" aria-label="ランキング" data-i18n-aria="ranking">
+          <h2 data-i18n="ranking">ランキング</h2>
+          <div class="ranking-tabs" role="tablist" aria-label="ランキング切り替え" data-i18n-aria="tabsLabel">
+            <button id="bestRankingTab" class="ranking-tab active" type="button" data-i18n="bestTab">最高スコア</button>
+            <button id="firstRankingTab" class="ranking-tab" type="button" data-i18n="firstTab">初挑戦</button>
           </div>
+          <button id="rankingReloadButton" class="secondary-button" type="button" data-i18n="retryRequest">再試行</button>
           <p id="rankingStatus" class="ranking-status">ランキング取得中です…</p>
           <ol id="rankingList" class="ranking-list"></ol>
         </section>
 
         <section class="item-result">
-          <h2>アイテム取得回数</h2>
+          <h2 data-i18n="itemCountTitle">アイテム取得回数</h2>
           <dl class="result-list small">
-            <div><dt>球追加</dt><dd id="resultAddBall">0</dd></div>
-            <div><dt>バー半分</dt><dd id="resultShrink">0</dd></div>
-            <div><dt>バー拡大</dt><dd id="resultGrow">0</dd></div>
-            <div><dt>速度1.5倍</dt><dd id="resultSpeed">0</dd></div>
+            <div><dt data-i18n="countAdd">球追加</dt><dd id="resultAddBall">0</dd></div>
+            <div><dt data-i18n="countShrink">バー半分</dt><dd id="resultShrink">0</dd></div>
+            <div><dt data-i18n="countGrow">バー拡大</dt><dd id="resultGrow">0</dd></div>
+            <div><dt data-i18n="countSpeed">速度1.5倍</dt><dd id="resultSpeed">0</dd></div>
           </dl>
         </section>
-        <div class="score-actions">
-          <button id="shareScoreButton" class="secondary-button" type="button">スコアをシェア</button>
-          <button id="restartButton" class="primary-button" type="button">ゲーム再開</button>
-          <button id="finishButton" class="secondary-button" type="button">終了</button>
+        <div class="audioSettings">
+          <button id="resultSound" class="secondary-button" type="button" aria-pressed="true">音：オン</button>
+          <label for="resultVolume" data-i18n="volume">音量</label>
+          <input id="resultVolume" type="range" min="0" max="100" step="1" value="50">
         </div>
+
       </div>
     </section>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite">クリップボードにコピーしました</div>
 
+  <script id="normal-score-ack8">
+'use strict';
+// Pure candidate; not loaded by any game or lab page. No RPC or storage calls.
+// Characterizes the existing normal submit_score 8-field response, not the
+// separately proposed (currently absent) shared-once 9-field wrapper.
+function validateNormalScoreAck8(data, expected) {
+  const fail = (reason) => ({ ok: false, reason });
+  const orders = {
+    juden_ga: 'desc', kodomo_demo_tokechau: 'desc',
+    machigai_mikke_easy: 'asc', machigai_mikke_hard: 'asc', machigai_mikke_super_hard: 'asc',
+    maketara_omae_no_sei_dakara: 'desc', meoshi_wo_seisu_normal: 'asc', meoshi_wo_seisu_hard: 'asc',
+    nayuta_no_himatsubushi: 'desc', sandoicchi: 'desc', shiwakezaru: 'desc',
+    suiteki_catch: 'desc', torani_yasashiku: 'desc', toreba_iinoyo: 'desc', yume_wo_mitandakedosa: 'desc'
+  };
+  const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+  const validScore = (value) => Number.isInteger(value) && value >= -100000000 && value <= 100000000;
+  // Historical first/best values are returned from retained int4 columns;
+  // today's submit range does not prove historical rows used that range.
+  const validHistoricalScore = (value) => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+  if (!expected || typeof expected !== 'object' || Array.isArray(expected)
+      || !own(orders, expected.gameSlug) || orders[expected.gameSlug] !== expected.scoreOrder
+      || typeof expected.displayName !== 'string' || !validScore(expected.score)) return fail('invalid_expected_contract');
+  // PostgreSQL btrim(text) here removes U+0020 only. JS trim/NFKC/lowercase
+  // would change the observed server identity. Frontend input caps stay separate.
+  const name = expected.displayName.replace(/^ +| +$/g, '');
+  if (Array.from(name).length < 1 || Array.from(name).length > 20) return fail('invalid_expected_name');
+  if (!Array.isArray(data) || data.length !== 1) return fail('invalid_row_count');
+  const row = data[0];
+  if (!row || typeof row !== 'object' || Array.isArray(row)) return fail('invalid_row');
+  const keys = ['accepted', 'result_normalized_name', 'result_display_name', 'result_first_score',
+    'result_best_score', 'result_play_count', 'is_first_play', 'is_new_best'];
+  if (Object.keys(row).length !== keys.length || !keys.every((key) => own(row, key))) return fail('unexpected_schema');
+  if (row.accepted !== true || typeof row.is_first_play !== 'boolean' || typeof row.is_new_best !== 'boolean') return fail('not_accepted_or_invalid_flags');
+  if (row.result_normalized_name !== name || row.result_display_name !== name) return fail('name_mismatch');
+  if (!validHistoricalScore(row.result_first_score) || !validHistoricalScore(row.result_best_score)
+      || !Number.isInteger(row.result_play_count) || row.result_play_count < 1 || row.result_play_count > 2147483647) return fail('invalid_score_or_count');
+  const first = row.result_first_score;
+  const best = row.result_best_score;
+  const score = expected.score;
+  const bestAtLeast = expected.scoreOrder === 'asc' ? best <= score && best <= first : best >= score && best >= first;
+  if (!bestAtLeast) return fail('inconsistent_best');
+  if (row.is_first_play) {
+    if (row.result_play_count !== 1 || first !== score || best !== score || row.is_new_best !== true) return fail('inconsistent_first_play');
+  } else if (row.result_play_count < 2) return fail('inconsistent_later_play');
+  if (row.is_new_best && best !== score) return fail('new_best_mismatch');
+  return { ok: true, receipt: { ...row }, validationScope: 'normal8_shape_name_score_consistency_only' };
+}
+
+</script>
+  <script id="hima-client">
+'use strict';
+// Pure display/participation policy; no storage, network, timers or gameplay.
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.HimaClient=api;
+})(typeof globalThis==='object'?globalThis:this,function(){
+  const languages=Object.freeze([
+    ['ja','日本語','ja-JP'],['en','English','en-US'],['es','Español','es-ES'],
+    ['pt-BR','Português (Brasil)','pt-BR'],['zh-Hans','简体中文','zh-CN'],
+    ['fr','Français','fr-FR'],['de','Deutsch','de-DE'],['ko','한국어','ko-KR'],
+    ['ru','Русский','ru-RU'],['it','Italiano','it-IT'],['zh-Hant','繁體中文','zh-TW'],
+    ['id','Bahasa Indonesia','id-ID'],['tr','Türkçe','tr-TR'],
+    ['vi','Tiếng Việt','vi-VN'],['th','ไทย','th-TH']
+  ].map(Object.freeze));
+  function isSupported(value){return languages.some(row=>row[0]===value);}
+  function languageFromLocale(value){
+    const raw=String(value||'').trim().replace(/_/g,'-').toLowerCase();
+    if(!raw)return null;
+    if(raw.startsWith('zh')){
+      if(raw.includes('hant'))return 'zh-Hant';
+      if(raw.includes('hans'))return 'zh-Hans';
+      return /(?:^|-)(tw|hk|mo)(?:-|$)/.test(raw)?'zh-Hant':'zh-Hans';
+    }
+    const base=raw.split('-')[0];
+    if(base==='pt')return 'pt-BR';
+    return isSupported(base)?base:null;
+  }
+  function resolveLocale(saved,browserLocales){
+    if(isSupported(saved))return saved;
+    for(const locale of Array.isArray(browserLocales)?browserLocales:[]){
+      const resolved=languageFromLocale(locale);
+      if(resolved)return resolved;
+    }
+    return 'en';
+  }
+  function captureParticipation(value){
+    const capped=typeof value==='string'?value.trim().slice(0,20):'';
+    const displayName=capped.replace(/[\uD800-\uDBFF]$/,'');
+    return Object.freeze({displayName,participates:displayName.length>0});
+  }
+  const publicUrl='https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/';
+  const tags='#暇をつぶそう #ゲーム制作';
+  const messages=Object.freeze({
+    ja:['暇をつぶそう：バーで球を跳ね返し、200個のブロックを壊そう！壁とバーでの減点に注意。','暇をつぶそうで {score} 点！'],
+    en:['暇をつぶそう: Bounce balls with the paddle to break 200 blocks! Watch out for wall and paddle penalties.','I scored {score} points in 暇をつぶそう!'],
+    es:['暇をつぶそう: ¡Rebota las bolas con la pala y rompe 200 bloques! Ojo con las penalizaciones de paredes y pala.','¡Conseguí {score} puntos en 暇をつぶそう!'],
+    'pt-BR':['暇をつぶそう: Rebata as bolas com a barra e quebre 200 blocos! Cuidado com as penalidades nas paredes e na barra.','Fiz {score} pontos em 暇をつぶそう!'],
+    'zh-Hans':['暇をつぶそう：用挡板反弹小球，击碎200个砖块！注意碰墙和挡板会扣分。','我在暇をつぶそう中得了 {score} 分！'],
+    fr:['暇をつぶそう : Faites rebondir les balles avec la raquette pour casser 200 briques ! Attention aux pénalités des murs et de la raquette.',"J’ai marqué {score} points dans 暇をつぶそう !"],
+    de:['暇をつぶそう: Lenke die Bälle mit dem Schläger und zerstöre 200 Blöcke! Wände und Schläger kosten Punkte.','Ich habe {score} Punkte in 暇をつぶそう erreicht!'],
+    ko:['暇をつぶそう: 막대로 공을 튕겨 블록 200개를 부수세요! 벽과 막대에 맞으면 감점돼요.','暇をつぶそう에서 {score}점을 기록했어요!'],
+    ru:['暇をつぶそう: Отбивайте мячи платформой и разбейте 200 блоков! Стены и платформа отнимают очки.','Мой результат в 暇をつぶそう: {score} очк.'],
+    it:['暇をつぶそう: Fai rimbalzare le palline con la barra e rompi 200 blocchi! Attenzione alle penalità di muri e barra.','Ho ottenuto {score} punti in 暇をつぶそう!'],
+    'zh-Hant':['暇をつぶそう：用擋板反彈小球，擊碎200個磚塊！注意碰牆和擋板會扣分。','我在暇をつぶそう中得了 {score} 分！'],
+    id:['暇をつぶそう: Pantulkan bola dengan papan dan hancurkan 200 balok! Dinding dan papan mengurangi poin.','Saya mendapat {score} poin di 暇をつぶそう!'],
+    tr:['暇をつぶそう: Topları raketle sektir ve 200 bloğu kır! Duvar ve raket temasında puan kaybedersin.','暇をつぶそう oyununda {score} puan aldım!'],
+    vi:['暇をつぶそう: Dùng thanh đỡ bật bóng để phá 200 khối! Chạm tường và thanh đỡ sẽ bị trừ điểm.','Tôi đạt {score} điểm trong 暇をつぶそう!'],
+    th:['暇をつぶそう: ใช้แถบรับลูกบอลให้กระเด้งไปทำลาย 200 บล็อก! ระวังโดนหักคะแนนเมื่อชนกำแพงหรือแถบรับ','ฉันได้ {score} คะแนนใน 暇をつぶそう!']
+  });
+  function shareText(options){
+    const locale=isSupported(options.locale)?options.locale:'en';
+    const result=options.screen==='score';
+    if(result&&(typeof options.score!=='number'||!Number.isFinite(options.score)))throw new TypeError('A finite current score is required');
+    const numberLocale=languages.find(row=>row[0]===locale)[2];
+    const line=result?messages[locale][1].replace('{score}',new Intl.NumberFormat(numberLocale).format(options.score)):messages[locale][0];
+    return line+'\n'+publicUrl+'\n'+tags;
+  }
+  const fallbackLabels=Object.freeze({
+  "ja": "Xを開けない場合は、共有文を選択してコピーしてください。",
+  "en": "If X cannot open, select and copy the share text.",
+  "es": "Si no se abre X, selecciona y copia el texto para compartir.",
+  "pt-BR": "Se o X não abrir, selecione e copie o texto para compartilhar.",
+  "zh-Hans": "如果无法打开X，请选择并复制分享文字。",
+  "fr": "Si X ne s’ouvre pas, sélectionnez et copiez le texte à partager.",
+  "de": "Wenn X nicht geöffnet wird, markiere und kopiere den Text zum Teilen.",
+  "ko": "X를 열 수 없다면 공유 문구를 선택해서 복사해 주세요.",
+  "ru": "Если X не открывается, выделите и скопируйте текст для публикации.",
+  "it": "Se X non si apre, seleziona e copia il testo da condividere.",
+  "zh-Hant": "如果無法開啟X，請選取並複製分享文字。",
+  "id": "Jika X tidak terbuka, pilih dan salin teks untuk dibagikan.",
+  "tr": "X açılamazsa paylaşım metnini seçip kopyala.",
+  "vi": "Nếu không mở được X, hãy chọn và sao chép nội dung chia sẻ.",
+  "th": "หากเปิด X ไม่ได้ ให้เลือกและคัดลอกข้อความที่จะแชร์"
+});
+  function shareFallbackLabel(locale){return fallbackLabels[isSupported(locale)?locale:"en"];}
+  function shareIntent(text) { return 'https://twitter.com/intent/tweet?text='+encodeURIComponent(text); }
+  function createShareAction(options) {
+    let lastActivation=-Infinity;
+    return function activateShare(event) {
+      if(options.getScreen()!==options.screen || options.isDisabled() || (event.button!=null&&event.button!==0))return;
+      event.preventDefault();
+      const now=options.now();
+      if(now-lastActivation<500)return;
+      lastActivation=now;
+      const text=options.getText();
+      let popup;
+      try {
+        popup=options.openPopup('', '_blank');
+        if(!popup)throw new Error('Popup unavailable');
+        popup.opener=null;
+        if(popup.opener!==null)throw new Error('Popup opener could not be detached');
+        const destination=popup.document.createElement('a');
+        destination.href=shareIntent(text);
+        destination.target='_self';
+        destination.rel='noreferrer';
+        destination.referrerPolicy='no-referrer';
+        popup.document.body.append(destination);
+        destination.click();
+      } catch (_) {
+        try { if(popup)popup.close(); } catch (_) {}
+        options.fallback(text);
+      }
+    };
+  }
+  return Object.freeze({languages,resolveLocale,captureParticipation,shareText,shareFallbackLabel,shareIntent,createShareAction,
+    title:'暇をつぶそう',tags,publicUrl,
+    rankingUrl:'https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=nayuta_no_himatsubushi'});
+});
+
+</script>
+  <script id="hima-audio">
+'use strict';
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.HimaAudio=api;
+})(typeof globalThis==='object'?globalThis:this,function(){
+  const enabledKey='nayuta_no_himatsubushi_sound_enabled';
+  const volumeKey='nayuta_no_himatsubushi_sound_volume';
+  const tones=Object.freeze({blockHit:[520,.04,'triangle'],blockBreak:[740,.07,'sine'],item:[880,.12,'sine'],wall:[180,.035,'triangle'],paddle:[220,.04,'triangle'],lost:[120,.12,'triangle'],countdown:[500,.06,'triangle'],start:[740,.12,'sine'],finish:[520,.20,'sine'],ui:[360,.04,'sine']});
+  function createAudioController(options){
+    let enabled=true,volume=.5,context=null,disposed=false,resumeQueued=false,lastAttempt=null;
+    const voices=new Set(),lastPlayed=new Map();
+    function read(key){try{return options.storage.getItem(key);}catch(_){return null;}}
+    function save(key,value){try{options.storage.setItem(key,String(value));}catch(_){}}
+    const savedEnabled=read(enabledKey),savedVolume=read(volumeKey);
+    if(savedEnabled==='false')enabled=false;
+    if(typeof savedVolume==='string'&&savedVolume.trim()!==''){
+      const parsed=Number(savedVolume);
+      if(Number.isFinite(parsed)&&parsed>=0&&parsed<=1)volume=parsed;
+    }
+    function cleanup(voice){
+      if(voice.cleaned)return;
+      voice.cleaned=true;voices.delete(voice);
+      try{if(voice.oscillator)voice.oscillator.disconnect();}catch(_){}
+      try{if(voice.gain)voice.gain.disconnect();}catch(_){}
+    }
+    function silence(){
+      for(const voice of [...voices]){
+        try{voice.oscillator.stop();}catch(_){}
+        cleanup(voice);
+      }
+      lastPlayed.clear();
+    }
+    function unlock(){
+      if(disposed||!enabled||volume===0||options.isHidden())return Promise.resolve(false);
+      try{
+        if(!context||context.state==='closed')context=options.createContext();
+        if(!context)return Promise.resolve(false);
+        if(context.state==='running')return Promise.resolve(true);
+        if(resumeQueued)return lastAttempt||Promise.resolve(false);
+        resumeQueued=true;
+        Promise.resolve().then(()=>{resumeQueued=false;});
+        const attemptContext=context;
+        const resumed=attemptContext.resume();
+        lastAttempt=Promise.resolve(resumed).then(()=>!disposed&&enabled&&volume>0&&!options.isHidden()&&context===attemptContext&&attemptContext.state==='running',()=>false);
+        return lastAttempt;
+      }catch(_){return Promise.resolve(false);}
+    }
+    function play(event){
+      const tone=Object.hasOwn(tones,event)?tones[event]:null;
+      if(!tone||disposed||!enabled||volume===0||options.isHidden()||!context||context.state!=='running')return false;
+      const now=options.now();
+      if(voices.size>=8||now-(lastPlayed.get(event)??-Infinity)<60)return false;
+      const voice={oscillator:null,gain:null,cleaned:false};
+      try{
+        voice.oscillator=context.createOscillator();
+        voice.gain=context.createGain();
+        const at=context.currentTime;
+        voice.oscillator.type=tone[2];
+        voice.oscillator.frequency.setValueAtTime(tone[0],at);
+        voice.gain.gain.setValueAtTime(.0001,at);
+        voice.gain.gain.linearRampToValueAtTime(volume*.18,at+.008);
+        voice.gain.gain.exponentialRampToValueAtTime(.0001,at+tone[1]);
+        voice.oscillator.connect(voice.gain);voice.gain.connect(context.destination);
+        voice.oscillator.onended=()=>cleanup(voice);
+        voices.add(voice);
+        voice.oscillator.start(at);voice.oscillator.stop(at+tone[1]+.01);
+        lastPlayed.set(event,now);
+        return true;
+      }catch(_){
+        try{if(voice.oscillator)voice.oscillator.stop();}catch(_){}
+        cleanup(voice);return false;
+      }
+    }
+    function setEnabled(value){enabled=Boolean(value);save(enabledKey,enabled);if(!enabled)silence();}
+    function setVolume(value){const next=Number(value);if(!Number.isFinite(next))return;volume=Math.max(0,Math.min(1,next));save(volumeKey,volume);if(volume===0)silence();}
+    function dispose(){
+      if(disposed)return;
+      disposed=true;silence();
+      try{if(context&&typeof context.close==='function')Promise.resolve(context.close()).catch(()=>{});}catch(_){}
+      context=null;
+    }
+    return Object.freeze({isEnabled:()=>enabled,getVolume:()=>volume,activeVoices:()=>voices.size,setEnabled,setVolume,unlock,play,silence,dispose});
+  }
+  return Object.freeze({createAudioController});
+});
+
+</script>
+  <script type="application/json" id="hima-catalog">
+{
+  "ja": {
+    "gameTitle": "暇をつぶそう",
+    "description": "球をバーで跳ね返して200個のブロックを壊そう。壁やバーでの減点に注意！",
+    "homeBest": "このブラウザの最高スコア",
+    "start": "ゲーム開始",
+    "share": "Xでシェア",
+    "ranking": "ランキング",
+    "nameLabel": "プレイヤー名（任意）",
+    "namePlaceholder": "20文字以内",
+    "nameDisclosure": "名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。",
+    "rulesTitle": "ルール説明",
+    "ruleLead": "球をバーで跳ね返して、200個のブロックを壊します。ブロックを壊すと加点され、壁やバーに当たると減点されます。",
+    "ruleBlock": "ブロック破壊：+50点",
+    "rulePaddle": "バーで受け止める：−10点",
+    "ruleWall": "壁に当たる：−5点",
+    "ruleLost": "球を1個失うと、残りの球が7秒間2倍サイズ・判定も2倍",
+    "ruleStart": "ゲームは3、2、1のあとに始まります",
+    "ruleEffect": "アイテム取得時は🦈または🫧の演出が出ます",
+    "itemsTitle": "アイテム説明",
+    "itemAdd": "球を2個増やす。🦈演出",
+    "itemShrink": "バーが半分になる。🫧演出",
+    "itemGrow": "バーが1.5倍になる。🦈演出",
+    "itemSpeed": "球の速度が10秒間1.5倍。取得ごとに10秒加算。🫧演出",
+    "hudMinus": "マイナス",
+    "hudTotal": "合計",
+    "pause": "一時停止",
+    "paused": "一時停止中",
+    "resume": "再開",
+    "viewScore": "スコアを見る",
+    "scoreTitle": "スコア",
+    "resultTotal": "合計スコア",
+    "wallHits": "壁に当たった回数",
+    "paddleCatches": "受け止めた回数",
+    "cleared": "暇をつぶせたね🦈🫧",
+    "syncTitle": "ランキング連携",
+    "sending": "ランキングへ送信中です…",
+    "submitted": "ランキングへ送信しました",
+    "syncFailed": "ランキング連携に失敗しました😅",
+    "anonymousNotSubmitted": "名前が未入力のため、この記録は公開されません。",
+    "currentScore": "今回スコア：{score}点",
+    "firstScore": "初回挑戦スコア：{score}点",
+    "bestScore": "最高スコア：{score}点",
+    "playCount": "プレイ回数：{count}回",
+    "firstRecorded": "初挑戦スコアを登録しました",
+    "newBest": "自己ベスト更新！",
+    "bestTab": "最高スコア",
+    "firstTab": "初挑戦",
+    "loading": "ランキング取得中です…",
+    "noRecords": "ランキングはまだありません",
+    "rankName": "{rank}位　{name}",
+    "points": "{score}点",
+    "times": "{count}回",
+    "unnamed": "名無し",
+    "itemCountTitle": "アイテム取得回数",
+    "countAdd": "球追加",
+    "countShrink": "バー半分",
+    "countGrow": "バー拡大",
+    "countSpeed": "速度1.5倍",
+    "restart": "もう一度遊ぶ",
+    "home": "ホームへ戻る",
+    "soundOn": "音：オン",
+    "soundOff": "音：オフ",
+    "volume": "音量",
+    "language": "言語",
+    "copied": "クリップボードにコピーしました",
+    "copyFailed": "コピーできませんでした。下の文章を選択してコピーしてください。",
+    "shareFallback": "Xを開けない場合は、共有文をコピーしてください。",
+    "homeShare": "暇をつぶそう：球をバーで跳ね返して200個のブロックを壊そう！壁やバーでの減点に注意。",
+    "resultShare": "暇をつぶそうで {score} 点！",
+    "homeLabel": "ホーム画面",
+    "gameLabel": "ゲーム画面",
+    "scoreLabel": "スコア画面",
+    "canvasLabel": "プレイ画面",
+    "syncLabel": "ランキング送信結果",
+    "tabsLabel": "ランキング切り替え",
+    "retryRequest": "再試行",
+    "browserGame": "スマートフォン用ブラウザーゲーム",
+    "resultLabel": "結果"
+  },
+  "en": {
+    "gameTitle": "暇をつぶそう",
+    "description": "Bounce balls with the paddle to break 200 blocks. Watch out for wall and paddle penalties!",
+    "homeBest": "Best score in this browser",
+    "start": "Start game",
+    "share": "Share on X",
+    "ranking": "Rankings",
+    "nameLabel": "Player name (optional)",
+    "namePlaceholder": "Up to 20 characters",
+    "nameDisclosure": "If you enter a name, your name and score will be published in the rankings. You can also play without a name.",
+    "rulesTitle": "How to play",
+    "ruleLead": "Bounce balls with the paddle to break 200 blocks. Breaking blocks earns points; hitting walls or the paddle loses points.",
+    "ruleBlock": "Break a block: +50 points",
+    "rulePaddle": "Catch a ball with the paddle: −10 points",
+    "ruleWall": "Hit a wall: −5 points",
+    "ruleLost": "Losing one ball doubles the size and collision radius of the remaining balls for 7 seconds",
+    "ruleStart": "The game starts after 3, 2, 1",
+    "ruleEffect": "Collecting an item triggers a 🦈 or 🫧 effect",
+    "itemsTitle": "Items",
+    "itemAdd": "Add two balls. 🦈 effect",
+    "itemShrink": "Halve the paddle width. 🫧 effect",
+    "itemGrow": "Make the paddle 1.5 times wider. 🦈 effect",
+    "itemSpeed": "Balls move 1.5 times faster for 10 seconds. Each pickup adds 10 seconds. 🫧 effect",
+    "hudMinus": "Penalties",
+    "hudTotal": "Total",
+    "pause": "Pause",
+    "paused": "Paused",
+    "resume": "Resume",
+    "viewScore": "View score",
+    "scoreTitle": "Score",
+    "resultTotal": "Total score",
+    "wallHits": "Wall hits",
+    "paddleCatches": "Paddle catches",
+    "cleared": "You passed the time! 🦈🫧",
+    "syncTitle": "Ranking connection",
+    "sending": "Submitting your score…",
+    "submitted": "Score submitted to the rankings",
+    "syncFailed": "Could not connect to the rankings 😅",
+    "anonymousNotSubmitted": "This score will not be published because no name was entered.",
+    "currentScore": "Current score: {score} points",
+    "firstScore": "First-play score: {score} points",
+    "bestScore": "Best score: {score} points",
+    "playCount": "Plays: {count}",
+    "firstRecorded": "First-play score recorded",
+    "newBest": "New personal best!",
+    "bestTab": "Best score",
+    "firstTab": "First play",
+    "loading": "Loading rankings…",
+    "noRecords": "No ranking records yet",
+    "rankName": "{rank}. {name}",
+    "points": "{score} points",
+    "times": "{count} times",
+    "unnamed": "Unnamed",
+    "itemCountTitle": "Items collected",
+    "countAdd": "Extra balls",
+    "countShrink": "Paddle halved",
+    "countGrow": "Paddle enlarged",
+    "countSpeed": "1.5× speed",
+    "restart": "Play again",
+    "home": "Back to home",
+    "soundOn": "Sound: on",
+    "soundOff": "Sound: off",
+    "volume": "Volume",
+    "language": "Language",
+    "copied": "Copied to the clipboard",
+    "copyFailed": "Could not copy. Select and copy the text below.",
+    "shareFallback": "If X cannot open, copy the share text.",
+    "homeShare": "暇をつぶそう: Bounce balls with the paddle to break 200 blocks! Watch out for wall and paddle penalties.",
+    "resultShare": "I scored {score} points in 暇をつぶそう!",
+    "homeLabel": "Home screen",
+    "gameLabel": "Game screen",
+    "scoreLabel": "Score screen",
+    "canvasLabel": "Play area",
+    "syncLabel": "Score submission result",
+    "tabsLabel": "Choose ranking type",
+    "retryRequest": "Try again",
+    "browserGame": "Smartphone browser game",
+    "resultLabel": "Results"
+  },
+  "es": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: ¡Rebota las bolas con la pala y rompe 200 bloques! Ojo con las penalizaciones de paredes y pala.",
+    "homeBest": "Mejor puntuación en este navegador",
+    "start": "Empezar",
+    "share": "Compartir en X",
+    "ranking": "Clasificación",
+    "nameLabel": "Nombre (opcional)",
+    "namePlaceholder": "Hasta 20 caracteres",
+    "nameDisclosure": "Si escribes un nombre, tu nombre y puntuación serán públicos en la clasificación. También puedes jugar sin nombre.",
+    "rulesTitle": "Cómo jugar",
+    "ruleLead": "暇をつぶそう: ¡Rebota las bolas con la pala y rompe 200 bloques! Ojo con las penalizaciones de paredes y pala.",
+    "ruleBlock": "Romper un bloque: +50 puntos",
+    "rulePaddle": "Atrapar una bola con la pala: −10 puntos",
+    "ruleWall": "Golpear una pared: −5 puntos",
+    "ruleLost": "Al perder una bola, el tamaño y el radio de colisión de las restantes se duplican durante 7 segundos",
+    "ruleStart": "La partida empieza después de 3, 2, 1",
+    "ruleEffect": "Recoger un objeto activa un efecto 🦈 o 🫧",
+    "itemsTitle": "Objetos",
+    "itemAdd": "Añade dos bolas. Efecto 🦈",
+    "itemShrink": "Reduce la pala a la mitad. Efecto 🫧",
+    "itemGrow": "Aumenta el ancho de la pala a 1,5 veces. Efecto 🦈",
+    "itemSpeed": "Las bolas van 1,5 veces más rápido durante 10 segundos. Cada objeto añade 10 segundos. Efecto 🫧",
+    "hudMinus": "Penalizaciones",
+    "hudTotal": "Total",
+    "pause": "Pausar",
+    "paused": "En pausa",
+    "resume": "Continuar",
+    "viewScore": "Ver puntuación",
+    "scoreTitle": "Puntuación",
+    "resultTotal": "Puntuación total",
+    "wallHits": "Golpes contra paredes",
+    "paddleCatches": "Bolas atrapadas con la pala",
+    "cleared": "¡Has pasado el rato! 🦈🫧",
+    "syncTitle": "Clasificación",
+    "sending": "Enviando puntuación…",
+    "submitted": "Puntuación enviada a la clasificación",
+    "syncFailed": "No se pudo conectar con la clasificación 😅",
+    "anonymousNotSubmitted": "No has escrito un nombre, así que esta puntuación no se ha publicado.",
+    "currentScore": "Esta puntuación: {score} puntos",
+    "firstScore": "Primer intento: {score} puntos",
+    "bestScore": "Mejor puntuación: {score} puntos",
+    "playCount": "Partidas jugadas: {count}",
+    "firstRecorded": "Se ha registrado tu puntuación del primer intento.",
+    "newBest": "¡Nuevo récord personal!",
+    "bestTab": "Mejor puntuación",
+    "firstTab": "Primer intento",
+    "loading": "Cargando…",
+    "noRecords": "Aún no hay puntuaciones.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} puntos",
+    "times": "{count}",
+    "unnamed": "Sin nombre",
+    "itemCountTitle": "Objetos recogidos",
+    "countAdd": "Bolas extra",
+    "countShrink": "Pala reducida",
+    "countGrow": "Pala ampliada",
+    "countSpeed": "Velocidad ×1,5",
+    "restart": "Jugar otra vez",
+    "home": "Volver al inicio",
+    "soundOn": "Sonido: activado",
+    "soundOff": "Sonido: desactivado",
+    "volume": "Volumen",
+    "language": "Idioma",
+    "copied": "Copiado al portapapeles",
+    "copyFailed": "No se ha podido copiar. Selecciona y copia el texto de abajo.",
+    "shareFallback": "Si X no se abre, copia el texto para compartir.",
+    "homeShare": "暇をつぶそう: ¡Rebota las bolas con la pala y rompe 200 bloques! Ojo con las penalizaciones de paredes y pala.",
+    "resultShare": "¡Conseguí {score} puntos en 暇をつぶそう!",
+    "homeLabel": "Pantalla de inicio",
+    "gameLabel": "Pantalla de juego",
+    "scoreLabel": "Pantalla de puntuación",
+    "canvasLabel": "Zona de juego",
+    "syncLabel": "Clasificación",
+    "tabsLabel": "Clasificación",
+    "retryRequest": "Reintentar",
+    "browserGame": "Juego de navegador para móvil",
+    "resultLabel": "Resultados"
+  },
+  "pt-BR": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Rebata as bolas com a barra e quebre 200 blocos! Cuidado com as penalidades nas paredes e na barra.",
+    "homeBest": "Melhor pontuação neste navegador",
+    "start": "Começar",
+    "share": "Compartilhar no X",
+    "ranking": "Ranking",
+    "nameLabel": "Nome do jogador (opcional)",
+    "namePlaceholder": "Até 20 caracteres",
+    "nameDisclosure": "Ao informar um nome, seu nome e pontuação serão publicados no ranking. Você também pode jogar sem nome.",
+    "rulesTitle": "Como jogar",
+    "ruleLead": "暇をつぶそう: Rebata as bolas com a barra e quebre 200 blocos! Cuidado com as penalidades nas paredes e na barra.",
+    "ruleBlock": "Quebrar um bloco: +50 pontos",
+    "rulePaddle": "Rebater uma bola com a barra: −10 pontos",
+    "ruleWall": "Bater na parede: −5 pontos",
+    "ruleLost": "Perder uma bola dobra o tamanho e o raio de colisão das bolas restantes por 7 segundos",
+    "ruleStart": "O jogo começa após 3, 2, 1",
+    "ruleEffect": "Coletar um item ativa um efeito 🦈 ou 🫧",
+    "itemsTitle": "Itens",
+    "itemAdd": "Adiciona duas bolas. Efeito 🦈",
+    "itemShrink": "Reduz a largura da barra pela metade. Efeito 🫧",
+    "itemGrow": "Aumenta a largura da barra para 1,5 vez. Efeito 🦈",
+    "itemSpeed": "As bolas ficam 1,5 vez mais rápidas por 10 segundos. Cada item adiciona 10 segundos. Efeito 🫧",
+    "hudMinus": "Penalidades",
+    "hudTotal": "Total",
+    "pause": "Pausar",
+    "paused": "Em pausa",
+    "resume": "Continuar",
+    "viewScore": "Ver pontuação",
+    "scoreTitle": "Pontuação",
+    "resultTotal": "Pontuação total",
+    "wallHits": "Batidas nas paredes",
+    "paddleCatches": "Bolas rebatidas com a barra",
+    "cleared": "Você passou o tempo! 🦈🫧",
+    "syncTitle": "Ranking",
+    "sending": "Enviando sua pontuação…",
+    "submitted": "Pontuação enviada ao ranking",
+    "syncFailed": "Não foi possível conectar ao ranking 😅",
+    "anonymousNotSubmitted": "Nenhum nome foi informado, então esta pontuação não foi publicada.",
+    "currentScore": "Pontuação desta partida: {score} pontos",
+    "firstScore": "Primeira tentativa: {score} pontos",
+    "bestScore": "Melhor pontuação: {score} pontos",
+    "playCount": "Partidas jogadas: {count}",
+    "firstRecorded": "A pontuação da sua primeira tentativa foi registrada.",
+    "newBest": "Novo recorde pessoal!",
+    "bestTab": "Melhor pontuação",
+    "firstTab": "Primeira tentativa",
+    "loading": "Carregando…",
+    "noRecords": "Ainda não há pontuações.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} pontos",
+    "times": "{count}",
+    "unnamed": "Sem nome",
+    "itemCountTitle": "Itens coletados",
+    "countAdd": "Bolas extras",
+    "countShrink": "Barra reduzida",
+    "countGrow": "Barra ampliada",
+    "countSpeed": "Velocidade ×1,5",
+    "restart": "Jogar de novo",
+    "home": "Voltar ao início",
+    "soundOn": "Som: ligado",
+    "soundOff": "Som: desligado",
+    "volume": "Volume",
+    "language": "Idioma",
+    "copied": "Copiado para a área de transferência",
+    "copyFailed": "Não foi possível copiar. Selecione e copie o texto abaixo.",
+    "shareFallback": "Se o X não abrir, copie o texto de compartilhamento.",
+    "homeShare": "暇をつぶそう: Rebata as bolas com a barra e quebre 200 blocos! Cuidado com as penalidades nas paredes e na barra.",
+    "resultShare": "Fiz {score} pontos em 暇をつぶそう!",
+    "homeLabel": "Tela inicial",
+    "gameLabel": "Tela do jogo",
+    "scoreLabel": "Tela de pontuação",
+    "canvasLabel": "Área de jogo",
+    "syncLabel": "Ranking",
+    "tabsLabel": "Ranking",
+    "retryRequest": "Tentar novamente",
+    "browserGame": "Jogo de navegador para celular",
+    "resultLabel": "Resultados"
+  },
+  "zh-Hans": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう：用挡板反弹小球，击碎200个砖块！注意碰墙和挡板会扣分。",
+    "homeBest": "此浏览器的最高分",
+    "start": "开始游戏",
+    "share": "分享到X",
+    "ranking": "排行榜",
+    "nameLabel": "玩家名（选填）",
+    "namePlaceholder": "最多20个字符",
+    "nameDisclosure": "填写名字后，名字和成绩会公开在排行榜上。不填也可以玩。",
+    "rulesTitle": "玩法说明",
+    "ruleLead": "暇をつぶそう：用挡板反弹小球，击碎200个砖块！注意碰墙和挡板会扣分。",
+    "ruleBlock": "击碎砖块：+50分",
+    "rulePaddle": "用挡板接球：−10分",
+    "ruleWall": "碰到墙壁：−5分",
+    "ruleLost": "每丢失一个球，剩余球的大小和碰撞半径翻倍，持续7秒",
+    "ruleStart": "倒数3、2、1后开始游戏",
+    "ruleEffect": "拾取道具时会出现🦈或🫧特效",
+    "itemsTitle": "道具说明",
+    "itemAdd": "增加两个球。🦈特效",
+    "itemShrink": "挡板宽度减半。🫧特效",
+    "itemGrow": "挡板宽度变为1.5倍。🦈特效",
+    "itemSpeed": "球速变为1.5倍，持续10秒。每次拾取增加10秒。🫧特效",
+    "hudMinus": "扣分",
+    "hudTotal": "总分",
+    "pause": "暂停",
+    "paused": "已暂停",
+    "resume": "继续",
+    "viewScore": "查看分数",
+    "scoreTitle": "分数",
+    "resultTotal": "总分",
+    "wallHits": "碰墙次数",
+    "paddleCatches": "挡板接球次数",
+    "cleared": "成功打发时间啦！🦈🫧",
+    "syncTitle": "排行榜",
+    "sending": "正在提交成绩…",
+    "submitted": "分数已提交至排行榜",
+    "syncFailed": "无法连接排行榜😅",
+    "anonymousNotSubmitted": "未填写名字，本次成绩不会公开。",
+    "currentScore": "本次成绩：{score}分",
+    "firstScore": "首次挑战成绩：{score}分",
+    "bestScore": "最高成绩：{score}分",
+    "playCount": "游玩次数：{count}次",
+    "firstRecorded": "已记录首次挑战成绩。",
+    "newBest": "刷新个人最佳！",
+    "bestTab": "最高成绩",
+    "firstTab": "首次挑战",
+    "loading": "加载中…",
+    "noRecords": "暂无成绩。",
+    "rankName": "{rank} · {name}",
+    "points": "{score}分",
+    "times": "{count}",
+    "unnamed": "未命名",
+    "itemCountTitle": "道具拾取次数",
+    "countAdd": "增加球",
+    "countShrink": "挡板减半",
+    "countGrow": "挡板变宽",
+    "countSpeed": "1.5倍球速",
+    "restart": "再玩一次",
+    "home": "返回首页",
+    "soundOn": "声音：开",
+    "soundOff": "声音：关",
+    "volume": "音量",
+    "language": "语言",
+    "copied": "已复制到剪贴板",
+    "copyFailed": "无法复制。请选择并复制下方文字。",
+    "shareFallback": "如果无法打开X，请复制分享文字。",
+    "homeShare": "暇をつぶそう：用挡板反弹小球，击碎200个砖块！注意碰墙和挡板会扣分。",
+    "resultShare": "我在暇をつぶそう中得了 {score} 分！",
+    "homeLabel": "主画面",
+    "gameLabel": "游戏画面",
+    "scoreLabel": "分数画面",
+    "canvasLabel": "游戏区域",
+    "syncLabel": "排行榜",
+    "tabsLabel": "排行榜",
+    "retryRequest": "重试",
+    "browserGame": "手机浏览器游戏",
+    "resultLabel": "结果"
+  },
+  "fr": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう : Faites rebondir les balles avec la raquette pour casser 200 briques ! Attention aux pénalités des murs et de la raquette.",
+    "homeBest": "Meilleur score dans ce navigateur",
+    "start": "Jouer",
+    "share": "Partager sur X",
+    "ranking": "Classement",
+    "nameLabel": "Nom du joueur (facultatif)",
+    "namePlaceholder": "20 caractères maximum",
+    "nameDisclosure": "Si vous indiquez un nom, votre nom et votre score seront publics dans le classement. Vous pouvez aussi jouer sans nom.",
+    "rulesTitle": "Comment jouer",
+    "ruleLead": "暇をつぶそう : Faites rebondir les balles avec la raquette pour casser 200 briques ! Attention aux pénalités des murs et de la raquette.",
+    "ruleBlock": "Casser une brique : +50 points",
+    "rulePaddle": "Renvoyer une balle avec la raquette : −10 points",
+    "ruleWall": "Toucher un mur : −5 points",
+    "ruleLost": "Perdre une balle double la taille et le rayon de collision des balles restantes pendant 7 secondes",
+    "ruleStart": "La partie commence après 3, 2, 1",
+    "ruleEffect": "Ramasser un objet déclenche un effet 🦈 ou 🫧",
+    "itemsTitle": "Objets",
+    "itemAdd": "Ajoute deux balles. Effet 🦈",
+    "itemShrink": "Divise la largeur de la raquette par deux. Effet 🫧",
+    "itemGrow": "Multiplie la largeur de la raquette par 1,5. Effet 🦈",
+    "itemSpeed": "Les balles vont 1,5 fois plus vite pendant 10 secondes. Chaque objet ajoute 10 secondes. Effet 🫧",
+    "hudMinus": "Pénalités",
+    "hudTotal": "Total",
+    "pause": "Pause",
+    "paused": "En pause",
+    "resume": "Reprendre",
+    "viewScore": "Voir le score",
+    "scoreTitle": "Score",
+    "resultTotal": "Score total",
+    "wallHits": "Contacts avec les murs",
+    "paddleCatches": "Balles renvoyées par la raquette",
+    "cleared": "Vous avez passé le temps ! 🦈🫧",
+    "syncTitle": "Classement",
+    "sending": "Envoi du score…",
+    "submitted": "Score envoyé au classement",
+    "syncFailed": "Connexion au classement impossible 😅",
+    "anonymousNotSubmitted": "Aucun nom n'a été indiqué, ce score n'a donc pas été publié.",
+    "currentScore": "Score de cette partie : {score} points",
+    "firstScore": "Première tentative : {score} points",
+    "bestScore": "Meilleur score : {score} points",
+    "playCount": "Parties jouées : {count}",
+    "firstRecorded": "Le score de votre première tentative a été enregistré.",
+    "newBest": "Nouveau record personnel !",
+    "bestTab": "Meilleur score",
+    "firstTab": "Première tentative",
+    "loading": "Chargement…",
+    "noRecords": "Aucun score pour le moment.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} points",
+    "times": "{count}",
+    "unnamed": "Sans nom",
+    "itemCountTitle": "Objets ramassés",
+    "countAdd": "Balles supplémentaires",
+    "countShrink": "Raquette rétrécie",
+    "countGrow": "Raquette agrandie",
+    "countSpeed": "Vitesse ×1,5",
+    "restart": "Rejouer",
+    "home": "Retour à l'accueil",
+    "soundOn": "Son : activé",
+    "soundOff": "Son : désactivé",
+    "volume": "Volume",
+    "language": "Langue",
+    "copied": "Copié dans le presse-papiers",
+    "copyFailed": "Copie impossible. Sélectionnez et copiez le texte ci-dessous.",
+    "shareFallback": "Si X ne s'ouvre pas, copiez le texte à partager.",
+    "homeShare": "暇をつぶそう : Faites rebondir les balles avec la raquette pour casser 200 briques ! Attention aux pénalités des murs et de la raquette.",
+    "resultShare": "J’ai marqué {score} points dans 暇をつぶそう !",
+    "homeLabel": "Écran d’accueil",
+    "gameLabel": "Écran de jeu",
+    "scoreLabel": "Écran du score",
+    "canvasLabel": "Zone de jeu",
+    "syncLabel": "Classement",
+    "tabsLabel": "Classement",
+    "retryRequest": "Réessayer",
+    "browserGame": "Jeu de navigateur pour smartphone",
+    "resultLabel": "Résultats"
+  },
+  "de": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Lenke die Bälle mit dem Schläger und zerstöre 200 Blöcke! Wände und Schläger kosten Punkte.",
+    "homeBest": "Bestwert in diesem Browser",
+    "start": "Spiel starten",
+    "share": "Auf X teilen",
+    "ranking": "Rangliste",
+    "nameLabel": "Spielername (optional)",
+    "namePlaceholder": "Bis zu 20 Zeichen",
+    "nameDisclosure": "Wenn du einen Namen eingibst, werden Name und Ergebnis in der Rangliste veröffentlicht. Du kannst auch ohne Namen spielen.",
+    "rulesTitle": "Spielanleitung",
+    "ruleLead": "暇をつぶそう: Lenke die Bälle mit dem Schläger und zerstöre 200 Blöcke! Wände und Schläger kosten Punkte.",
+    "ruleBlock": "Block zerstören: +50 Punkte",
+    "rulePaddle": "Ball mit dem Schläger abfangen: −10 Punkte",
+    "ruleWall": "Wand berühren: −5 Punkte",
+    "ruleLost": "Geht ein Ball verloren, verdoppeln sich Größe und Kollisionsradius der übrigen Bälle für 7 Sekunden",
+    "ruleStart": "Das Spiel beginnt nach 3, 2, 1",
+    "ruleEffect": "Ein eingesammeltes Item löst einen 🦈- oder 🫧-Effekt aus",
+    "itemsTitle": "Items",
+    "itemAdd": "Fügt zwei Bälle hinzu. 🦈-Effekt",
+    "itemShrink": "Halbiert die Schlägerbreite. 🫧-Effekt",
+    "itemGrow": "Vergrößert die Schlägerbreite auf das 1,5-Fache. 🦈-Effekt",
+    "itemSpeed": "Bälle sind 10 Sekunden lang 1,5-mal so schnell. Jedes Item verlängert die Dauer um 10 Sekunden. 🫧-Effekt",
+    "hudMinus": "Abzüge",
+    "hudTotal": "Gesamt",
+    "pause": "Pause",
+    "paused": "Pausiert",
+    "resume": "Fortsetzen",
+    "viewScore": "Punktestand ansehen",
+    "scoreTitle": "Punktestand",
+    "resultTotal": "Gesamtpunktzahl",
+    "wallHits": "Wandkontakte",
+    "paddleCatches": "Mit dem Schläger abgefangene Bälle",
+    "cleared": "Du hast dir die Zeit vertrieben! 🦈🫧",
+    "syncTitle": "Rangliste",
+    "sending": "Ergebnis wird gesendet…",
+    "submitted": "Punktestand an die Rangliste übermittelt",
+    "syncFailed": "Verbindung zur Rangliste fehlgeschlagen 😅",
+    "anonymousNotSubmitted": "Es wurde kein Name eingegeben, daher wurde dieses Ergebnis nicht veröffentlicht.",
+    "currentScore": "Dieses Ergebnis: {score} Punkte",
+    "firstScore": "Erster Versuch: {score} Punkte",
+    "bestScore": "Bestwert: {score} Punkte",
+    "playCount": "Gespielte Partien: {count}",
+    "firstRecorded": "Dein Ergebnis des ersten Versuchs wurde gespeichert.",
+    "newBest": "Neuer persönlicher Bestwert!",
+    "bestTab": "Bestwert",
+    "firstTab": "Erster Versuch",
+    "loading": "Wird geladen…",
+    "noRecords": "Noch keine Ergebnisse.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} Punkte",
+    "times": "{count}",
+    "unnamed": "Ohne Namen",
+    "itemCountTitle": "Eingesammelte Items",
+    "countAdd": "Zusätzliche Bälle",
+    "countShrink": "Schläger verkleinert",
+    "countGrow": "Schläger vergrößert",
+    "countSpeed": "Tempo ×1,5",
+    "restart": "Erneut spielen",
+    "home": "Zur Startseite",
+    "soundOn": "Ton: an",
+    "soundOff": "Ton: aus",
+    "volume": "Lautstärke",
+    "language": "Sprache",
+    "copied": "In die Zwischenablage kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen. Markiere und kopiere den Text unten.",
+    "shareFallback": "Wenn X sich nicht öffnet, kopiere den Teilen-Text.",
+    "homeShare": "暇をつぶそう: Lenke die Bälle mit dem Schläger und zerstöre 200 Blöcke! Wände und Schläger kosten Punkte.",
+    "resultShare": "Ich habe {score} Punkte in 暇をつぶそう erreicht!",
+    "homeLabel": "Startbildschirm",
+    "gameLabel": "Spielbildschirm",
+    "scoreLabel": "Punktestandbildschirm",
+    "canvasLabel": "Spielfeld",
+    "syncLabel": "Rangliste",
+    "tabsLabel": "Rangliste",
+    "retryRequest": "Erneut versuchen",
+    "browserGame": "Browserspiel fürs Smartphone",
+    "resultLabel": "Ergebnis"
+  },
+  "ko": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: 막대로 공을 튕겨 블록 200개를 부수세요! 벽과 막대에 맞으면 감점돼요.",
+    "homeBest": "이 브라우저의 최고 점수",
+    "start": "게임 시작",
+    "share": "X에 공유",
+    "ranking": "순위표",
+    "nameLabel": "플레이어 이름 (선택)",
+    "namePlaceholder": "20자 이내",
+    "nameDisclosure": "이름을 입력하면 이름과 기록이 순위표에 공개돼요. 비워 두어도 플레이할 수 있어요.",
+    "rulesTitle": "게임 방법",
+    "ruleLead": "暇をつぶそう: 막대로 공을 튕겨 블록 200개를 부수세요! 벽과 막대에 맞으면 감점돼요.",
+    "ruleBlock": "블록 파괴: +50점",
+    "rulePaddle": "막대로 공 받기: −10점",
+    "ruleWall": "벽에 부딪히기: −5점",
+    "ruleLost": "공 하나를 잃으면 남은 공의 크기와 충돌 반경이 7초 동안 두 배가 됩니다",
+    "ruleStart": "3, 2, 1 카운트다운 후 게임이 시작됩니다",
+    "ruleEffect": "아이템을 얻으면 🦈 또는 🫧 효과가 나타납니다",
+    "itemsTitle": "아이템 설명",
+    "itemAdd": "공을 2개 추가합니다. 🦈 효과",
+    "itemShrink": "막대 너비가 절반이 됩니다. 🫧 효과",
+    "itemGrow": "막대 너비가 1.5배가 됩니다. 🦈 효과",
+    "itemSpeed": "공 속도가 10초 동안 1.5배가 됩니다. 획득할 때마다 10초가 추가됩니다. 🫧 효과",
+    "hudMinus": "감점",
+    "hudTotal": "합계",
+    "pause": "일시 정지",
+    "paused": "일시 정지 중",
+    "resume": "계속하기",
+    "viewScore": "점수 보기",
+    "scoreTitle": "점수",
+    "resultTotal": "총점",
+    "wallHits": "벽에 부딪힌 횟수",
+    "paddleCatches": "막대로 공을 받은 횟수",
+    "cleared": "시간을 잘 보냈네요! 🦈🫧",
+    "syncTitle": "순위표",
+    "sending": "점수 전송 중…",
+    "submitted": "점수를 순위표로 전송했습니다",
+    "syncFailed": "순위에 연결하지 못했습니다 😅",
+    "anonymousNotSubmitted": "이름을 입력하지 않아 이번 기록은 공개되지 않았어요.",
+    "currentScore": "이번 점수: {score}점",
+    "firstScore": "첫 도전 점수: {score}점",
+    "bestScore": "최고 점수: {score}점",
+    "playCount": "플레이 횟수: {count}회",
+    "firstRecorded": "첫 도전 점수가 등록됐어요.",
+    "newBest": "개인 최고 기록 경신!",
+    "bestTab": "최고 점수",
+    "firstTab": "첫 도전",
+    "loading": "불러오는 중…",
+    "noRecords": "아직 기록이 없어요.",
+    "rankName": "{rank} · {name}",
+    "points": "{score}점",
+    "times": "{count}",
+    "unnamed": "이름 없음",
+    "itemCountTitle": "아이템 획득 횟수",
+    "countAdd": "공 추가",
+    "countShrink": "막대 절반",
+    "countGrow": "막대 확대",
+    "countSpeed": "속도 1.5배",
+    "restart": "다시 하기",
+    "home": "홈으로",
+    "soundOn": "소리: 켜짐",
+    "soundOff": "소리: 꺼짐",
+    "volume": "음량",
+    "language": "언어",
+    "copied": "클립보드에 복사했어요",
+    "copyFailed": "복사하지 못했어요. 아래 글을 선택해 복사해 주세요.",
+    "shareFallback": "X가 열리지 않으면 공유 문구를 복사해 주세요.",
+    "homeShare": "暇をつぶそう: 막대로 공을 튕겨 블록 200개를 부수세요! 벽과 막대에 맞으면 감점돼요.",
+    "resultShare": "暇をつぶそう에서 {score}점을 기록했어요!",
+    "homeLabel": "홈 화면",
+    "gameLabel": "게임 화면",
+    "scoreLabel": "점수 화면",
+    "canvasLabel": "플레이 영역",
+    "syncLabel": "순위표",
+    "tabsLabel": "순위표",
+    "retryRequest": "다시 시도",
+    "browserGame": "스마트폰 브라우저 게임",
+    "resultLabel": "결과"
+  },
+  "ru": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Отбивайте мячи платформой и разбейте 200 блоков! Стены и платформа отнимают очки.",
+    "homeBest": "Лучший результат в этом браузере",
+    "start": "Начать игру",
+    "share": "Поделиться в X",
+    "ranking": "Рейтинг",
+    "nameLabel": "Имя игрока (необязательно)",
+    "namePlaceholder": "До 20 символов",
+    "nameDisclosure": "Если вы укажете имя, ваше имя и результат будут опубликованы в рейтинге. Можно играть и без имени.",
+    "rulesTitle": "Как играть",
+    "ruleLead": "暇をつぶそう: Отбивайте мячи платформой и разбейте 200 блоков! Стены и платформа отнимают очки.",
+    "ruleBlock": "Разбить блок: +50 очков",
+    "rulePaddle": "Отбить мяч платформой: −10 очков",
+    "ruleWall": "Коснуться стены: −5 очков",
+    "ruleLost": "При потере одного мяча размер и радиус столкновения остальных удваиваются на 7 секунд",
+    "ruleStart": "Игра начинается после отсчёта 3, 2, 1",
+    "ruleEffect": "Подбор предмета запускает эффект 🦈 или 🫧",
+    "itemsTitle": "Предметы",
+    "itemAdd": "Добавляет два мяча. Эффект 🦈",
+    "itemShrink": "Уменьшает ширину платформы вдвое. Эффект 🫧",
+    "itemGrow": "Увеличивает ширину платформы в 1,5 раза. Эффект 🦈",
+    "itemSpeed": "Мячи движутся в 1,5 раза быстрее в течение 10 секунд. Каждый подбор добавляет 10 секунд. Эффект 🫧",
+    "hudMinus": "Штрафы",
+    "hudTotal": "Всего",
+    "pause": "Пауза",
+    "paused": "На паузе",
+    "resume": "Продолжить",
+    "viewScore": "Посмотреть счёт",
+    "scoreTitle": "Счёт",
+    "resultTotal": "Общий счёт",
+    "wallHits": "Касания стен",
+    "paddleCatches": "Отбитые платформой мячи",
+    "cleared": "Время прошло не зря! 🦈🫧",
+    "syncTitle": "Рейтинг",
+    "sending": "Отправка результата…",
+    "submitted": "Результат отправлен в рейтинг",
+    "syncFailed": "Не удалось подключиться к рейтингу 😅",
+    "anonymousNotSubmitted": "Имя не указано, поэтому этот результат не опубликован.",
+    "currentScore": "Этот результат: {score} очк.",
+    "firstScore": "Первая попытка: {score} очк.",
+    "bestScore": "Лучший результат: {score} очк.",
+    "playCount": "Сыграно раз: {count}",
+    "firstRecorded": "Результат первой попытки записан.",
+    "newBest": "Новый личный рекорд!",
+    "bestTab": "Лучший результат",
+    "firstTab": "Первая попытка",
+    "loading": "Загрузка…",
+    "noRecords": "Результатов пока нет.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} очк.",
+    "times": "{count}",
+    "unnamed": "Без имени",
+    "itemCountTitle": "Собранные предметы",
+    "countAdd": "Дополнительные мячи",
+    "countShrink": "Сужение платформы",
+    "countGrow": "Расширение платформы",
+    "countSpeed": "Скорость ×1,5",
+    "restart": "Играть снова",
+    "home": "На главную",
+    "soundOn": "Звук: вкл.",
+    "soundOff": "Звук: выкл.",
+    "volume": "Громкость",
+    "language": "Язык",
+    "copied": "Скопировано в буфер обмена",
+    "copyFailed": "Не удалось скопировать. Выделите и скопируйте текст ниже.",
+    "shareFallback": "Если X не открывается, скопируйте текст публикации.",
+    "homeShare": "暇をつぶそう: Отбивайте мячи платформой и разбейте 200 блоков! Стены и платформа отнимают очки.",
+    "resultShare": "Мой результат в 暇をつぶそう: {score} очк.",
+    "homeLabel": "Главный экран",
+    "gameLabel": "Игровой экран",
+    "scoreLabel": "Экран счёта",
+    "canvasLabel": "Игровая область",
+    "syncLabel": "Рейтинг",
+    "tabsLabel": "Рейтинг",
+    "retryRequest": "Повторить",
+    "browserGame": "Браузерная игра для смартфона",
+    "resultLabel": "Результаты"
+  },
+  "it": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Fai rimbalzare le palline con la barra e rompi 200 blocchi! Attenzione alle penalità di muri e barra.",
+    "homeBest": "Miglior punteggio in questo browser",
+    "start": "Inizia",
+    "share": "Condividi su X",
+    "ranking": "Classifica",
+    "nameLabel": "Nome del giocatore (facoltativo)",
+    "namePlaceholder": "Fino a 20 caratteri",
+    "nameDisclosure": "Inserendo un nome, il nome e il punteggio saranno pubblicati in classifica. Puoi giocare anche senza nome.",
+    "rulesTitle": "Come si gioca",
+    "ruleLead": "暇をつぶそう: Fai rimbalzare le palline con la barra e rompi 200 blocchi! Attenzione alle penalità di muri e barra.",
+    "ruleBlock": "Distruggere un blocco: +50 punti",
+    "rulePaddle": "Ribattere una pallina con la barra: −10 punti",
+    "ruleWall": "Colpire un muro: −5 punti",
+    "ruleLost": "Perdere una pallina raddoppia dimensioni e raggio di collisione delle altre per 7 secondi",
+    "ruleStart": "La partita inizia dopo 3, 2, 1",
+    "ruleEffect": "Raccogliere un oggetto attiva un effetto 🦈 o 🫧",
+    "itemsTitle": "Oggetti",
+    "itemAdd": "Aggiunge due palline. Effetto 🦈",
+    "itemShrink": "Dimezza la larghezza della barra. Effetto 🫧",
+    "itemGrow": "Moltiplica la larghezza della barra per 1,5. Effetto 🦈",
+    "itemSpeed": "Le palline vanno 1,5 volte più veloci per 10 secondi. Ogni raccolta aggiunge 10 secondi. Effetto 🫧",
+    "hudMinus": "Penalità",
+    "hudTotal": "Totale",
+    "pause": "Pausa",
+    "paused": "In pausa",
+    "resume": "Riprendi",
+    "viewScore": "Vedi punteggio",
+    "scoreTitle": "Punteggio",
+    "resultTotal": "Punteggio totale",
+    "wallHits": "Contatti con i muri",
+    "paddleCatches": "Palline ribattute con la barra",
+    "cleared": "Hai fatto passare il tempo! 🦈🫧",
+    "syncTitle": "Classifica",
+    "sending": "Invio del punteggio…",
+    "submitted": "Punteggio inviato alla classifica",
+    "syncFailed": "Connessione alla classifica non riuscita 😅",
+    "anonymousNotSubmitted": "Non hai inserito un nome, quindi questo punteggio non è stato pubblicato.",
+    "currentScore": "Questo punteggio: {score} punti",
+    "firstScore": "Primo tentativo: {score} punti",
+    "bestScore": "Miglior punteggio: {score} punti",
+    "playCount": "Partite giocate: {count}",
+    "firstRecorded": "Il punteggio del tuo primo tentativo è stato registrato.",
+    "newBest": "Nuovo record personale!",
+    "bestTab": "Miglior punteggio",
+    "firstTab": "Primo tentativo",
+    "loading": "Caricamento…",
+    "noRecords": "Ancora nessun punteggio.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} punti",
+    "times": "{count}",
+    "unnamed": "Senza nome",
+    "itemCountTitle": "Oggetti raccolti",
+    "countAdd": "Palline extra",
+    "countShrink": "Barra dimezzata",
+    "countGrow": "Barra ingrandita",
+    "countSpeed": "Velocità ×1,5",
+    "restart": "Gioca ancora",
+    "home": "Torna alla pagina iniziale",
+    "soundOn": "Audio: attivo",
+    "soundOff": "Audio: disattivato",
+    "volume": "Volume",
+    "language": "Lingua",
+    "copied": "Copiato negli appunti",
+    "copyFailed": "Impossibile copiare. Seleziona e copia il testo qui sotto.",
+    "shareFallback": "Se X non si apre, copia il testo da condividere.",
+    "homeShare": "暇をつぶそう: Fai rimbalzare le palline con la barra e rompi 200 blocchi! Attenzione alle penalità di muri e barra.",
+    "resultShare": "Ho ottenuto {score} punti in 暇をつぶそう!",
+    "homeLabel": "Schermata iniziale",
+    "gameLabel": "Schermata di gioco",
+    "scoreLabel": "Schermata del punteggio",
+    "canvasLabel": "Area di gioco",
+    "syncLabel": "Classifica",
+    "tabsLabel": "Classifica",
+    "retryRequest": "Riprova",
+    "browserGame": "Gioco per browser su smartphone",
+    "resultLabel": "Risultati"
+  },
+  "zh-Hant": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう：用擋板反彈小球，擊碎200個磚塊！注意碰牆和擋板會扣分。",
+    "homeBest": "此瀏覽器的最高分",
+    "start": "開始遊戲",
+    "share": "分享到X",
+    "ranking": "排行榜",
+    "nameLabel": "玩家名稱（選填）",
+    "namePlaceholder": "最多20個字元",
+    "nameDisclosure": "填寫名字後，名字和成績會公開在排行榜上。不填也可以玩。",
+    "rulesTitle": "玩法說明",
+    "ruleLead": "暇をつぶそう：用擋板反彈小球，擊碎200個磚塊！注意碰牆和擋板會扣分。",
+    "ruleBlock": "擊碎磚塊：+50分",
+    "rulePaddle": "用擋板接球：−10分",
+    "ruleWall": "碰到牆壁：−5分",
+    "ruleLost": "每失去一個球，剩餘球的大小和碰撞半徑加倍，持續7秒",
+    "ruleStart": "倒數3、2、1後開始遊戲",
+    "ruleEffect": "拾取道具時會出現🦈或🫧特效",
+    "itemsTitle": "道具說明",
+    "itemAdd": "增加兩個球。🦈特效",
+    "itemShrink": "擋板寬度減半。🫧特效",
+    "itemGrow": "擋板寬度變為1.5倍。🦈特效",
+    "itemSpeed": "球速變為1.5倍，持續10秒。每次拾取增加10秒。🫧特效",
+    "hudMinus": "扣分",
+    "hudTotal": "總分",
+    "pause": "暫停",
+    "paused": "已暫停",
+    "resume": "繼續",
+    "viewScore": "查看分數",
+    "scoreTitle": "分數",
+    "resultTotal": "總分",
+    "wallHits": "碰牆次數",
+    "paddleCatches": "擋板接球次數",
+    "cleared": "成功打發時間啦！🦈🫧",
+    "syncTitle": "排行榜",
+    "sending": "正在提交成績…",
+    "submitted": "分數已提交至排行榜",
+    "syncFailed": "無法連接排行榜😅",
+    "anonymousNotSubmitted": "未填寫名字，本次成績不會公開。",
+    "currentScore": "本次成績：{score}分",
+    "firstScore": "首次挑戰成績：{score}分",
+    "bestScore": "最高成績：{score}分",
+    "playCount": "遊玩次數：{count}次",
+    "firstRecorded": "已記錄首次挑戰成績。",
+    "newBest": "刷新個人最佳！",
+    "bestTab": "最高成績",
+    "firstTab": "首次挑戰",
+    "loading": "載入中…",
+    "noRecords": "暫無成績。",
+    "rankName": "{rank} · {name}",
+    "points": "{score}分",
+    "times": "{count}",
+    "unnamed": "未命名",
+    "itemCountTitle": "道具拾取次數",
+    "countAdd": "增加球",
+    "countShrink": "擋板減半",
+    "countGrow": "擋板變寬",
+    "countSpeed": "1.5倍球速",
+    "restart": "再玩一次",
+    "home": "返回首頁",
+    "soundOn": "音效：開",
+    "soundOff": "音效：關",
+    "volume": "音量",
+    "language": "語言",
+    "copied": "已複製到剪貼簿",
+    "copyFailed": "無法複製。請選取並複製下方文字。",
+    "shareFallback": "如果無法開啟X，請複製分享文字。",
+    "homeShare": "暇をつぶそう：用擋板反彈小球，擊碎200個磚塊！注意碰牆和擋板會扣分。",
+    "resultShare": "我在暇をつぶそう中得了 {score} 分！",
+    "homeLabel": "主畫面",
+    "gameLabel": "遊戲畫面",
+    "scoreLabel": "分數畫面",
+    "canvasLabel": "遊戲區域",
+    "syncLabel": "排行榜",
+    "tabsLabel": "排行榜",
+    "retryRequest": "重試",
+    "browserGame": "手機瀏覽器遊戲",
+    "resultLabel": "結果"
+  },
+  "id": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Pantulkan bola dengan papan dan hancurkan 200 balok! Dinding dan papan mengurangi poin.",
+    "homeBest": "Skor terbaik di browser ini",
+    "start": "Mulai bermain",
+    "share": "Bagikan di X",
+    "ranking": "Peringkat",
+    "nameLabel": "Nama pemain (opsional)",
+    "namePlaceholder": "Maksimal 20 karakter",
+    "nameDisclosure": "Jika mengisi nama, nama dan skor Anda akan dipublikasikan di peringkat. Anda juga bisa bermain tanpa nama.",
+    "rulesTitle": "Cara bermain",
+    "ruleLead": "暇をつぶそう: Pantulkan bola dengan papan dan hancurkan 200 balok! Dinding dan papan mengurangi poin.",
+    "ruleBlock": "Menghancurkan balok: +50 poin",
+    "rulePaddle": "Memantulkan bola dengan papan: −10 poin",
+    "ruleWall": "Menyentuh dinding: −5 poin",
+    "ruleLost": "Kehilangan satu bola menggandakan ukuran dan radius tabrakan bola yang tersisa selama 7 detik",
+    "ruleStart": "Permainan dimulai setelah hitungan 3, 2, 1",
+    "ruleEffect": "Mengambil item memunculkan efek 🦈 atau 🫧",
+    "itemsTitle": "Item",
+    "itemAdd": "Menambah dua bola. Efek 🦈",
+    "itemShrink": "Memperkecil lebar papan menjadi setengah. Efek 🫧",
+    "itemGrow": "Memperbesar lebar papan menjadi 1,5 kali. Efek 🦈",
+    "itemSpeed": "Bola bergerak 1,5 kali lebih cepat selama 10 detik. Setiap item menambah 10 detik. Efek 🫧",
+    "hudMinus": "Pengurangan",
+    "hudTotal": "Total",
+    "pause": "Jeda",
+    "paused": "Dijeda",
+    "resume": "Lanjutkan",
+    "viewScore": "Lihat skor",
+    "scoreTitle": "Skor",
+    "resultTotal": "Total skor",
+    "wallHits": "Benturan dengan dinding",
+    "paddleCatches": "Bola yang dipantulkan papan",
+    "cleared": "Waktunya sudah terisi! 🦈🫧",
+    "syncTitle": "Peringkat",
+    "sending": "Mengirim skor…",
+    "submitted": "Skor terkirim ke peringkat",
+    "syncFailed": "Tidak dapat terhubung ke peringkat 😅",
+    "anonymousNotSubmitted": "Nama tidak diisi, jadi skor ini tidak dipublikasikan.",
+    "currentScore": "Skor kali ini: {score} poin",
+    "firstScore": "Skor percobaan pertama: {score} poin",
+    "bestScore": "Skor terbaik: {score} poin",
+    "playCount": "Jumlah bermain: {count}",
+    "firstRecorded": "Skor percobaan pertama Anda telah dicatat.",
+    "newBest": "Rekor pribadi baru!",
+    "bestTab": "Skor terbaik",
+    "firstTab": "Percobaan pertama",
+    "loading": "Memuat…",
+    "noRecords": "Belum ada skor.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} poin",
+    "times": "{count}",
+    "unnamed": "Tanpa nama",
+    "itemCountTitle": "Item yang diambil",
+    "countAdd": "Bola tambahan",
+    "countShrink": "Papan setengah",
+    "countGrow": "Papan diperbesar",
+    "countSpeed": "Kecepatan ×1,5",
+    "restart": "Main lagi",
+    "home": "Kembali ke beranda",
+    "soundOn": "Suara: aktif",
+    "soundOff": "Suara: nonaktif",
+    "volume": "Volume",
+    "language": "Bahasa",
+    "copied": "Disalin ke papan klip",
+    "copyFailed": "Tidak dapat menyalin. Pilih dan salin teks di bawah.",
+    "shareFallback": "Jika X tidak terbuka, salin teks berbagi.",
+    "homeShare": "暇をつぶそう: Pantulkan bola dengan papan dan hancurkan 200 balok! Dinding dan papan mengurangi poin.",
+    "resultShare": "Saya mendapat {score} poin di 暇をつぶそう!",
+    "homeLabel": "Layar beranda",
+    "gameLabel": "Layar permainan",
+    "scoreLabel": "Layar skor",
+    "canvasLabel": "Area bermain",
+    "syncLabel": "Peringkat",
+    "tabsLabel": "Peringkat",
+    "retryRequest": "Coba lagi",
+    "browserGame": "Game browser untuk ponsel",
+    "resultLabel": "Hasil"
+  },
+  "tr": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Topları raketle sektir ve 200 bloğu kır! Duvar ve raket temasında puan kaybedersin.",
+    "homeBest": "Bu tarayıcıdaki en iyi skor",
+    "start": "Oyunu başlat",
+    "share": "X'te paylaş",
+    "ranking": "Sıralama",
+    "nameLabel": "Oyuncu adı (isteğe bağlı)",
+    "namePlaceholder": "En fazla 20 karakter",
+    "nameDisclosure": "Ad girersen adın ve skorun sıralamada herkese açık olarak yayımlanır. Ad girmeden de oynayabilirsin.",
+    "rulesTitle": "Nasıl oynanır",
+    "ruleLead": "暇をつぶそう: Topları raketle sektir ve 200 bloğu kır! Duvar ve raket temasında puan kaybedersin.",
+    "ruleBlock": "Blok kırmak: +50 puan",
+    "rulePaddle": "Topu raketle sektirmek: −10 puan",
+    "ruleWall": "Duvara çarpmak: −5 puan",
+    "ruleLost": "Bir top kaybolunca kalan topların boyutu ve çarpışma yarıçapı 7 saniyeliğine iki katına çıkar",
+    "ruleStart": "Oyun 3, 2, 1 sayımından sonra başlar",
+    "ruleEffect": "Bir eşya almak 🦈 veya 🫧 efekti oluşturur",
+    "itemsTitle": "Eşyalar",
+    "itemAdd": "İki top ekler. 🦈 efekti",
+    "itemShrink": "Raket genişliğini yarıya indirir. 🫧 efekti",
+    "itemGrow": "Raket genişliğini 1,5 katına çıkarır. 🦈 efekti",
+    "itemSpeed": "Toplar 10 saniye boyunca 1,5 kat hızlı gider. Her eşya süreye 10 saniye ekler. 🫧 efekti",
+    "hudMinus": "Kesintiler",
+    "hudTotal": "Toplam",
+    "pause": "Duraklat",
+    "paused": "Duraklatıldı",
+    "resume": "Devam et",
+    "viewScore": "Skoru gör",
+    "scoreTitle": "Skor",
+    "resultTotal": "Toplam skor",
+    "wallHits": "Duvar temasları",
+    "paddleCatches": "Raketle karşılanan toplar",
+    "cleared": "Vakit geçirdin! 🦈🫧",
+    "syncTitle": "Sıralama",
+    "sending": "Skor gönderiliyor…",
+    "submitted": "Skor sıralamaya gönderildi",
+    "syncFailed": "Sıralamaya bağlanılamadı 😅",
+    "anonymousNotSubmitted": "Ad girilmediği için bu skor yayımlanmadı.",
+    "currentScore": "Bu oyunun skoru: {score} puan",
+    "firstScore": "İlk deneme skoru: {score} puan",
+    "bestScore": "En iyi skor: {score} puan",
+    "playCount": "Oynama sayısı: {count}",
+    "firstRecorded": "İlk deneme skorun kaydedildi.",
+    "newBest": "Yeni kişisel rekor!",
+    "bestTab": "En iyi skor",
+    "firstTab": "İlk deneme",
+    "loading": "Yükleniyor…",
+    "noRecords": "Henüz skor yok.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} puan",
+    "times": "{count}",
+    "unnamed": "Adsız",
+    "itemCountTitle": "Alınan eşyalar",
+    "countAdd": "Ek toplar",
+    "countShrink": "Yarım raket",
+    "countGrow": "Genişletilmiş raket",
+    "countSpeed": "Hız ×1,5",
+    "restart": "Tekrar oyna",
+    "home": "Ana sayfaya dön",
+    "soundOn": "Ses: açık",
+    "soundOff": "Ses: kapalı",
+    "volume": "Ses düzeyi",
+    "language": "Dil",
+    "copied": "Panoya kopyalandı",
+    "copyFailed": "Kopyalanamadı. Aşağıdaki metni seçip kopyala.",
+    "shareFallback": "X açılmazsa paylaşım metnini kopyala.",
+    "homeShare": "暇をつぶそう: Topları raketle sektir ve 200 bloğu kır! Duvar ve raket temasında puan kaybedersin.",
+    "resultShare": "暇をつぶそう oyununda {score} puan aldım!",
+    "homeLabel": "Ana ekran",
+    "gameLabel": "Oyun ekranı",
+    "scoreLabel": "Skor ekranı",
+    "canvasLabel": "Oyun alanı",
+    "syncLabel": "Sıralama",
+    "tabsLabel": "Sıralama",
+    "retryRequest": "Tekrar dene",
+    "browserGame": "Akıllı telefon için tarayıcı oyunu",
+    "resultLabel": "Sonuçlar"
+  },
+  "vi": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: Dùng thanh đỡ bật bóng để phá 200 khối! Chạm tường và thanh đỡ sẽ bị trừ điểm.",
+    "homeBest": "Điểm cao nhất trên trình duyệt này",
+    "start": "Bắt đầu chơi",
+    "share": "Chia sẻ lên X",
+    "ranking": "Bảng xếp hạng",
+    "nameLabel": "Tên người chơi (không bắt buộc)",
+    "namePlaceholder": "Tối đa 20 ký tự",
+    "nameDisclosure": "Nếu nhập tên, tên và điểm của bạn sẽ được công khai trên bảng xếp hạng. Bạn vẫn có thể chơi khi để trống.",
+    "rulesTitle": "Cách chơi",
+    "ruleLead": "暇をつぶそう: Dùng thanh đỡ bật bóng để phá 200 khối! Chạm tường và thanh đỡ sẽ bị trừ điểm.",
+    "ruleBlock": "Phá một khối: +50 điểm",
+    "rulePaddle": "Đỡ bóng bằng thanh: −10 điểm",
+    "ruleWall": "Chạm tường: −5 điểm",
+    "ruleLost": "Mất một quả bóng sẽ tăng gấp đôi kích thước và bán kính va chạm của các bóng còn lại trong 7 giây",
+    "ruleStart": "Trò chơi bắt đầu sau khi đếm 3, 2, 1",
+    "ruleEffect": "Nhặt vật phẩm sẽ tạo hiệu ứng 🦈 hoặc 🫧",
+    "itemsTitle": "Vật phẩm",
+    "itemAdd": "Thêm hai quả bóng. Hiệu ứng 🦈",
+    "itemShrink": "Giảm một nửa chiều rộng thanh đỡ. Hiệu ứng 🫧",
+    "itemGrow": "Tăng chiều rộng thanh đỡ lên 1,5 lần. Hiệu ứng 🦈",
+    "itemSpeed": "Bóng di chuyển nhanh gấp 1,5 lần trong 10 giây. Mỗi lần nhặt cộng thêm 10 giây. Hiệu ứng 🫧",
+    "hudMinus": "Điểm trừ",
+    "hudTotal": "Tổng",
+    "pause": "Tạm dừng",
+    "paused": "Đã tạm dừng",
+    "resume": "Tiếp tục",
+    "viewScore": "Xem điểm",
+    "scoreTitle": "Điểm",
+    "resultTotal": "Tổng điểm",
+    "wallHits": "Số lần chạm tường",
+    "paddleCatches": "Số lần đỡ bóng",
+    "cleared": "Bạn đã giết thời gian rồi! 🦈🫧",
+    "syncTitle": "Bảng xếp hạng",
+    "sending": "Đang gửi điểm…",
+    "submitted": "Đã gửi điểm lên bảng xếp hạng",
+    "syncFailed": "Không thể kết nối bảng xếp hạng 😅",
+    "anonymousNotSubmitted": "Bạn không nhập tên nên điểm này không được công khai.",
+    "currentScore": "Điểm lần này: {score} điểm",
+    "firstScore": "Điểm lần thử đầu: {score} điểm",
+    "bestScore": "Điểm cao nhất: {score} điểm",
+    "playCount": "Số lần chơi: {count}",
+    "firstRecorded": "Điểm lần thử đầu tiên đã được ghi nhận.",
+    "newBest": "Kỷ lục cá nhân mới!",
+    "bestTab": "Điểm cao nhất",
+    "firstTab": "Lần thử đầu",
+    "loading": "Đang tải…",
+    "noRecords": "Chưa có điểm nào.",
+    "rankName": "{rank} · {name}",
+    "points": "{score} điểm",
+    "times": "{count}",
+    "unnamed": "Chưa có tên",
+    "itemCountTitle": "Số vật phẩm đã nhặt",
+    "countAdd": "Thêm bóng",
+    "countShrink": "Thanh đỡ thu hẹp",
+    "countGrow": "Thanh đỡ mở rộng",
+    "countSpeed": "Tốc độ ×1,5",
+    "restart": "Chơi lại",
+    "home": "Về trang chủ",
+    "soundOn": "Âm thanh: bật",
+    "soundOff": "Âm thanh: tắt",
+    "volume": "Âm lượng",
+    "language": "Ngôn ngữ",
+    "copied": "Đã sao chép vào bộ nhớ tạm",
+    "copyFailed": "Không thể sao chép. Hãy chọn và sao chép văn bản bên dưới.",
+    "shareFallback": "Nếu X không mở, hãy sao chép nội dung chia sẻ.",
+    "homeShare": "暇をつぶそう: Dùng thanh đỡ bật bóng để phá 200 khối! Chạm tường và thanh đỡ sẽ bị trừ điểm.",
+    "resultShare": "Tôi đạt {score} điểm trong 暇をつぶそう!",
+    "homeLabel": "Màn hình chính",
+    "gameLabel": "Màn hình chơi",
+    "scoreLabel": "Màn hình điểm",
+    "canvasLabel": "Khu vực chơi",
+    "syncLabel": "Bảng xếp hạng",
+    "tabsLabel": "Bảng xếp hạng",
+    "retryRequest": "Thử lại",
+    "browserGame": "Trò chơi trình duyệt trên điện thoại",
+    "resultLabel": "Kết quả"
+  },
+  "th": {
+    "gameTitle": "暇をつぶそう",
+    "description": "暇をつぶそう: ใช้แถบรับลูกบอลให้กระเด้งไปทำลาย 200 บล็อก! ระวังโดนหักคะแนนเมื่อชนกำแพงหรือแถบรับ",
+    "homeBest": "คะแนนสูงสุดในเบราว์เซอร์นี้",
+    "start": "เริ่มเกม",
+    "share": "แชร์บน X",
+    "ranking": "อันดับ",
+    "nameLabel": "ชื่อผู้เล่น (ไม่จำเป็น)",
+    "namePlaceholder": "ไม่เกิน 20 ตัวอักษร",
+    "nameDisclosure": "หากกรอกชื่อ ชื่อและคะแนนของคุณจะเผยแพร่บนตารางอันดับ ไม่กรอกชื่อก็เล่นได้",
+    "rulesTitle": "วิธีเล่น",
+    "ruleLead": "暇をつぶそう: ใช้แถบรับลูกบอลให้กระเด้งไปทำลาย 200 บล็อก! ระวังโดนหักคะแนนเมื่อชนกำแพงหรือแถบรับ",
+    "ruleBlock": "ทำลายบล็อก: +50 คะแนน",
+    "rulePaddle": "รับลูกบอลด้วยแถบรับ: −10 คะแนน",
+    "ruleWall": "ชนกำแพง: −5 คะแนน",
+    "ruleLost": "เมื่อเสียลูกบอลหนึ่งลูก ขนาดและรัศมีการชนของลูกที่เหลือจะเพิ่มเป็นสองเท่านาน 7 วินาที",
+    "ruleStart": "เกมเริ่มหลังนับ 3, 2, 1",
+    "ruleEffect": "เมื่อเก็บไอเทมจะมีเอฟเฟกต์ 🦈 หรือ 🫧",
+    "itemsTitle": "ไอเทม",
+    "itemAdd": "เพิ่มลูกบอลสองลูก เอฟเฟกต์ 🦈",
+    "itemShrink": "ลดความกว้างแถบรับลงครึ่งหนึ่ง เอฟเฟกต์ 🫧",
+    "itemGrow": "เพิ่มความกว้างแถบรับเป็น 1.5 เท่า เอฟเฟกต์ 🦈",
+    "itemSpeed": "ลูกบอลเร็วขึ้นเป็น 1.5 เท่านาน 10 วินาที เก็บแต่ละครั้งเพิ่มเวลาอีก 10 วินาที เอฟเฟกต์ 🫧",
+    "hudMinus": "คะแนนที่หัก",
+    "hudTotal": "รวม",
+    "pause": "หยุดชั่วคราว",
+    "paused": "หยุดชั่วคราวอยู่",
+    "resume": "เล่นต่อ",
+    "viewScore": "ดูคะแนน",
+    "scoreTitle": "คะแนน",
+    "resultTotal": "คะแนนรวม",
+    "wallHits": "จำนวนครั้งที่ชนกำแพง",
+    "paddleCatches": "จำนวนครั้งที่รับลูกบอล",
+    "cleared": "ฆ่าเวลาได้แล้ว! 🦈🫧",
+    "syncTitle": "อันดับ",
+    "sending": "กำลังส่งคะแนน…",
+    "submitted": "ส่งคะแนนเข้าตารางอันดับแล้ว",
+    "syncFailed": "เชื่อมต่อตารางอันดับไม่ได้ 😅",
+    "anonymousNotSubmitted": "ไม่ได้กรอกชื่อ จึงไม่ได้เผยแพร่คะแนนครั้งนี้",
+    "currentScore": "คะแนนครั้งนี้: {score} คะแนน",
+    "firstScore": "คะแนนครั้งแรก: {score} คะแนน",
+    "bestScore": "คะแนนสูงสุด: {score} คะแนน",
+    "playCount": "จำนวนครั้งที่เล่น: {count}",
+    "firstRecorded": "บันทึกคะแนนการเล่นครั้งแรกแล้ว",
+    "newBest": "สถิติส่วนตัวใหม่!",
+    "bestTab": "คะแนนสูงสุด",
+    "firstTab": "ครั้งแรก",
+    "loading": "กำลังโหลด…",
+    "noRecords": "ยังไม่มีคะแนน",
+    "rankName": "{rank} · {name}",
+    "points": "{score} คะแนน",
+    "times": "{count}",
+    "unnamed": "ไม่มีชื่อ",
+    "itemCountTitle": "จำนวนไอเทมที่เก็บ",
+    "countAdd": "เพิ่มลูกบอล",
+    "countShrink": "แถบรับเล็กลง",
+    "countGrow": "แถบรับใหญ่ขึ้น",
+    "countSpeed": "ความเร็ว ×1.5",
+    "restart": "เล่นอีกครั้ง",
+    "home": "กลับหน้าหลัก",
+    "soundOn": "เสียง: เปิด",
+    "soundOff": "เสียง: ปิด",
+    "volume": "ระดับเสียง",
+    "language": "ภาษา",
+    "copied": "คัดลอกไปยังคลิปบอร์ดแล้ว",
+    "copyFailed": "คัดลอกไม่สำเร็จ โปรดเลือกและคัดลอกข้อความด้านล่าง",
+    "shareFallback": "หากเปิด X ไม่ได้ ให้คัดลอกข้อความแชร์",
+    "homeShare": "暇をつぶそう: ใช้แถบรับลูกบอลให้กระเด้งไปทำลาย 200 บล็อก! ระวังโดนหักคะแนนเมื่อชนกำแพงหรือแถบรับ",
+    "resultShare": "ฉันได้ {score} คะแนนใน 暇をつぶそう!",
+    "homeLabel": "หน้าหลัก",
+    "gameLabel": "หน้าจอเกม",
+    "scoreLabel": "หน้าจอคะแนน",
+    "canvasLabel": "พื้นที่เล่น",
+    "syncLabel": "อันดับ",
+    "tabsLabel": "อันดับ",
+    "retryRequest": "ลองอีกครั้ง",
+    "browserGame": "เกมเบราว์เซอร์สำหรับสมาร์ตโฟน",
+    "resultLabel": "ผลลัพธ์"
+  }
+}
+
+</script>
+<script id="hima-i18n">
+'use strict';
+(function(root,factory){
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./locales.json'));
+  else root.HimaI18n=factory(JSON.parse(root.document.getElementById('hima-catalog').textContent));
+})(typeof globalThis==='object'?globalThis:this,function(catalogs){
+  for(const catalog of Object.values(catalogs))Object.freeze(catalog);
+  Object.freeze(catalogs);
+  function createTranslator(options){
+    const key='nayuta_no_himatsubushi_language';
+    let saved=null;
+    try{saved=options.storage.getItem(key);}catch(_){}
+    let locale=options.client.resolveLocale(saved,options.languages);
+    function setLocale(next){
+      if(!Object.hasOwn(catalogs,next))return false;
+      locale=next;
+      try{options.storage.setItem(key,next);}catch(_){}
+      return true;
+    }
+    function t(key,values={}){
+      if(!Object.hasOwn(catalogs[locale],key))return key;
+      const template=catalogs[locale][key];
+      if(template===null)return null;
+      return template.replace(/\{([a-zA-Z]+)\}/g,(token,name)=>Object.hasOwn(values,name)?String(values[name]):token);
+    }
+    function format(value){
+      const row=options.client.languages.find(entry=>entry[0]===locale);
+      return new Intl.NumberFormat(row[2]).format(value);
+    }
+    return Object.freeze({getLocale:()=>locale,setLocale,t,format});
+  }
+  return Object.freeze({catalogs,createTranslator});
+});
+
+</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const GAME_TITLE="暇つぶし";
@@ -227,28 +1723,79 @@
     let view="home",gameState="idle",animationId=null,lastFrameTime=0,countdownTimer=null,toastTimer=null,W=0,H=0,dpr=1,paddle=null,balls=[],blocks=[],items=[],effectParticles=[],plusScore=0,minusScore=0,totalScore=0,wallHits=0,paddleCatches=0,itemCounts={},resultMessage="",ballBoostTimer=0,speedBoostTimer=0,currentPlayerName="",scoreSubmitted=false,scoreSubmitting=false,scoreSubmitResult=null,bestRankingRows=[],firstRankingRows=[],activeRankingType="best";
 
     function setViewportSize(){const h=Math.round((window.visualViewport&&window.visualViewport.height)||window.innerHeight||document.documentElement.clientHeight||667);document.documentElement.style.setProperty("--app-height",`${h}px`)}
-    function getBestScore(){return Number(localStorage.getItem(BEST_SCORE_KEY)||0)}
-    function setBestScore(score){const best=getBestScore();if(score>best)localStorage.setItem(BEST_SCORE_KEY,String(score));updateBestScoreView()}
-    function updateBestScoreView(){homeBestScoreEl.textContent=String(getBestScore())}
+    function getBestScore(){try{const value=Number(localStorage.getItem(BEST_SCORE_KEY)||0);bestStorageReadable=true;return value}catch(_){bestStorageReadable=false;return 0}}
+    function setBestScore(score){const best=getBestScore();if(!bestStorageReadable){updateBestScoreView();return false}let saved=true;if(score>best){try{localStorage.setItem(BEST_SCORE_KEY,String(score))}catch(_){saved=false}}updateBestScoreView();return saved}
+    function updateBestScoreView(){const best=getBestScore();homeBestScoreEl.textContent=bestStorageReadable?translator.format(best):"—"}
     function getSavedPlayerName(){try{return localStorage.getItem(PLAYER_NAME_KEY)||""}catch(e){console.error("player name load failed",e);return ""}}
     function savePlayerName(name){try{localStorage.setItem(PLAYER_NAME_KEY,name)}catch(e){console.error("player name save failed",e)}}
-    function requestGameStart(){
-      const saved=getSavedPlayerName().trim();
-      if(saved){
-        currentPlayerName=saved.slice(0,20);
-        startNewGame();
-        return;
+    const $=id=>document.getElementById(id);
+    const app=document.getElementById("app");
+    const sound=HimaAudio.createAudioController({
+      storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)},
+      isHidden:()=>document.hidden,now:()=>performance.now(),
+      createContext:()=>{const AudioContext=window.AudioContext||window.webkitAudioContext;return new AudioContext();}
+    });
+    const translator=HimaI18n.createTranslator({client:HimaClient,languages:navigator.languages||[navigator.language],storage:{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)}});
+    let currentLocale=translator.getLocale();
+    let bestStorageReadable=true;
+    let onlineDisplay={sync:"idle",rank:"idle"};
+    let rankingReadSequence=0,rankingReadPending=false;
+    let playGeneration=0;
+    let startRequested=false;
+    let playParticipation=Object.freeze({displayName:"",participates:false});
+    function refreshLanguage(){
+      currentLocale=translator.getLocale();
+      document.documentElement.lang=currentLocale;
+      document.title="🦈"+translator.t("gameTitle")+"🫧";
+      const description=document.querySelector('meta[name="description"]');
+      if(description)description.setAttribute("content",translator.t("description"));
+      for(const node of document.querySelectorAll("[data-i18n]"))node.textContent=translator.t(node.getAttribute("data-i18n"));
+      for(const node of document.querySelectorAll("[data-i18n-placeholder]"))node.setAttribute("placeholder",translator.t(node.getAttribute("data-i18n-placeholder")));
+      for(const node of document.querySelectorAll("[data-i18n-aria]"))node.setAttribute("aria-label",translator.t(node.getAttribute("data-i18n-aria")));
+      for(const id of ["homeLanguage","resultLanguage"])$(id).value=currentLocale;
+      const pause=$("pauseButton");
+      if(pause)pause.textContent=translator.t(gameState==="paused"?"resume":"pause");
+      updateBestScoreView();
+      updateHud();
+      updateSoundControls();
+      if(view==="score"){paintScore();paintOnlineStatus();}
+    }
+    function wireLanguageControls(){
+      for(const id of ["homeLanguage","resultLanguage"]){
+        const select=$(id);
+        for(const [locale,label] of HimaClient.languages){
+          const option=document.createElement("option");option.value=locale;option.textContent=label;select.appendChild(option);
+        }
+        select.addEventListener("change",()=>{if(translator.setLocale(select.value))refreshLanguage();});
       }
-      playerNameInput.value="";
+      refreshLanguage();
+    }
+    function wireStartControls(){
+      let composing=false;
+      playerNameInput.addEventListener("compositionstart",()=>{composing=true;});
+      playerNameInput.addEventListener("compositionend",()=>{composing=false;});
+      playerNameInput.addEventListener("keydown",event=>{
+        if(event.key!=="Enter"||composing||event.isComposing||event.keyCode===229)return;
+        event.preventDefault();
+        requestGameStart();
+      });
+      startGameButton.addEventListener("click",()=>requestGameStart());
+    }
+    function requestGameStart(){
+      if(startRequested||view!=="home")return;
+      startRequested=true;
+      unlockSound();
+      playParticipation=HimaClient.captureParticipation(playerNameInput.value);
+      currentPlayerName=playParticipation.displayName;
+      savePlayerName(currentPlayerName);
       playerNameError.textContent="";
-      showScreen("name");
-      window.setTimeout(()=>playerNameInput.focus(),80);
+      startNewGameAfterNameInput();
     }
     function startNewGameAfterNameInput(){
       if(playerNameInput)playerNameInput.blur();
       window.setTimeout(()=>{
         setViewportSize();
-        startNewGame();
+        try{startNewGame();}finally{startRequested=false;}
         window.setTimeout(()=>{
           if(view==="game"){
             setViewportSize();
@@ -274,15 +1821,31 @@
       if(!GAME_SLUG||GAME_SLUG.includes("ここに"))throw new Error("GAME_SLUG is not set");
       return window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
     }
-    function formatScore(value){return `${Number(value||0)}点`}
+    function paintOnlineStatus(){
+      const syncKeys={sending:"sending",anonymous:"anonymousNotSubmitted",submitted:"submitted",failed:"syncFailed"};
+      if(scoreSyncStatus&&Object.hasOwn(syncKeys,onlineDisplay.sync))scoreSyncStatus.textContent=translator.t(syncKeys[onlineDisplay.sync]);
+      if((onlineDisplay.sync==="submitted"||onlineDisplay.sync==="sending")&&scoreSubmitResult)renderScoreSyncResult(totalScore,scoreSubmitResult);
+      if(rankingList&&(onlineDisplay.rank==="loading"||onlineDisplay.rank==="failed"))rankingList.textContent="";
+      if(onlineDisplay.rank==="ready")renderRanking();
+      else if(rankingStatus&&onlineDisplay.rank==="loading")rankingStatus.textContent=translator.t("loading");
+      else if(rankingStatus&&onlineDisplay.rank==="failed")rankingStatus.textContent=translator.t("syncFailed");
+    }
+    function formatRankingScore(value){
+      if(!Number.isInteger(value)||value<-2147483648||value>2147483647)return translator.t("points",{score:"—"});
+      return formatScore(value);
+    }
+    function formatScore(value){return translator.t("points",{score:translator.format(Number(value||0))})}
     function setScoreActionsEnabled(enabled){
+      // Networking must not hide independent share/restart/home navigation.
       const actions=document.querySelector(".score-actions");
-      if(actions)actions.classList.toggle("disabled",!enabled);
+      if(actions)actions.classList.remove("disabled");
       for(const button of [shareScoreButton,restartButton,finishButton]){
-        if(button)button.disabled=!enabled;
+        if(button)button.disabled=false;
       }
     }
     function resetRankingState(){
+      rankingReadSequence+=1;rankingReadPending=false;updateRankingRetryControl();
+      onlineDisplay={sync:"idle",rank:"idle"};
       scoreSubmitted=false;
       scoreSubmitting=false;
       scoreSubmitResult=null;
@@ -296,11 +1859,12 @@
       setScoreActionsEnabled(true);
     }
     function setRankingError(){
+      onlineDisplay={sync:"failed",rank:"failed"};
       if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
-      if(scoreSyncStatus)scoreSyncStatus.textContent="ランキング連携に失敗しました😅";
+
       if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
       if(rankingCard)rankingCard.classList.remove("hidden");
-      if(rankingStatus)rankingStatus.textContent="ランキング連携に失敗しました😅";
+      paintOnlineStatus();
       if(rankingList)rankingList.textContent="";
     }
     function normalizeRpcRow(data){
@@ -313,53 +1877,103 @@
       scoreSubmitting=true;
       setScoreActionsEnabled(false);
       if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
-      if(scoreSyncStatus)scoreSyncStatus.textContent="ランキングへ送信中です…";
+      onlineDisplay={sync:playParticipation.participates?"sending":"anonymous",rank:"loading"};
+      paintOnlineStatus();
       if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
       if(rankingCard)rankingCard.classList.add("hidden");
 
+      const generation=playGeneration;
+      const participation=playParticipation;
       try{
         const client=createSupabaseClient();
         const finalScore=totalScore;
-        const {data,error}=await client.rpc("submit_score",{
-          p_display_name: currentPlayerName||getSavedPlayerName()||"名無し",
-          p_game_slug: GAME_SLUG,
-          p_score: finalScore,
-          p_client_version: CLIENT_VERSION
-        });
-        if(error)throw error;
-        scoreSubmitResult=normalizeRpcRow(data);
-        renderScoreSyncResult(finalScore,scoreSubmitResult);
+        if(participation.participates){
+          const {data,error}=await client.rpc("submit_score",{
+            p_display_name: participation.displayName,
+            p_game_slug: GAME_SLUG,
+            p_score: finalScore,
+            p_client_version: CLIENT_VERSION
+          });
+          if(generation!==playGeneration)return;
+          if(error)throw error;
+          const validated=validateNormalScoreAck8(data,{gameSlug:GAME_SLUG,displayName:participation.displayName,score:finalScore,scoreOrder:"desc"});
+          if(!validated.ok)throw new Error("Invalid normal score receipt: "+validated.reason);
+          scoreSubmitResult=validated.receipt;
+          renderScoreSyncResult(finalScore,scoreSubmitResult);
+        }else{
+          scoreSubmitResult=null;
+          if(scoreSyncDetails)scoreSyncDetails.classList.add("hidden");
+        }
 
-        const bestResult=await client.rpc("get_best_score_ranking",{p_game_slug:GAME_SLUG,p_limit:3});
-        if(bestResult.error)throw bestResult.error;
-        bestRankingRows=Array.isArray(bestResult.data)?bestResult.data:[];
-
-        const firstResult=await client.rpc("get_first_try_ranking",{p_game_slug:GAME_SLUG,p_limit:3});
-        if(firstResult.error)throw firstResult.error;
-        firstRankingRows=Array.isArray(firstResult.data)?firstResult.data:[];
-
-        if(rankingCard)rankingCard.classList.remove("hidden");
+        onlineDisplay.sync=participation.participates?"submitted":"anonymous";
         activeRankingType="best";
-        renderRanking();
-        if(scoreSyncStatus)scoreSyncStatus.textContent="ランキングへ送信しました";
+        await loadRankingsOnly(client,generation);
       }catch(error){
+        if(generation!==playGeneration)return;
         console.error("ranking integration failed",error);
         setRankingError();
       }finally{
+        if(generation===playGeneration){
         scoreSubmitting=false;
         setScoreActionsEnabled(true);
+        }
       }
+    }
+    function wireRankingRetryControl(){
+      const button=$("rankingReloadButton");
+      if(button)button.onclick=()=>retryRankingRead();
+      updateRankingRetryControl();
+    }
+    function updateRankingRetryControl(){
+      const button=$("rankingReloadButton");
+      if(button)button.disabled=rankingReadPending;
+    }
+    async function loadRankingsOnly(client,generation=playGeneration){
+      if(generation!==playGeneration)return false;
+      const request=++rankingReadSequence;
+      rankingReadPending=true;
+      onlineDisplay.rank="loading";
+      paintOnlineStatus();updateRankingRetryControl();
+      try{
+        const reader=client||createSupabaseClient();
+        const bestResult=await reader.rpc("get_best_score_ranking",{p_game_slug:GAME_SLUG,p_limit:30});
+        if(generation!==playGeneration||request!==rankingReadSequence)return false;
+        if(bestResult.error)throw bestResult.error;
+        bestRankingRows=Array.isArray(bestResult.data)?bestResult.data:[];
+        const firstResult=await reader.rpc("get_first_try_ranking",{p_game_slug:GAME_SLUG,p_limit:30});
+        if(generation!==playGeneration||request!==rankingReadSequence)return false;
+        if(firstResult.error)throw firstResult.error;
+        firstRankingRows=Array.isArray(firstResult.data)?firstResult.data:[];
+        if(rankingCard)rankingCard.classList.remove("hidden");
+        onlineDisplay.rank="ready";
+        paintOnlineStatus();
+        return true;
+      }catch(error){
+        if(generation!==playGeneration||request!==rankingReadSequence)return false;
+        console.error("ranking read failed",error);
+        onlineDisplay.rank="failed";
+        if(rankingCard)rankingCard.classList.remove("hidden");
+        if(rankingList)rankingList.textContent="";
+        paintOnlineStatus();
+        return false;
+      }finally{
+        if(generation===playGeneration&&request===rankingReadSequence){rankingReadPending=false;updateRankingRetryControl();}
+      }
+    }
+    function retryRankingRead(){
+      if(view!=="score"||rankingReadPending)return;
+      return loadRankingsOnly(null,playGeneration);
     }
     function renderScoreSyncResult(finalScore,result){
       if(scoreSyncCard)scoreSyncCard.classList.remove("hidden");
       if(scoreSyncDetails)scoreSyncDetails.classList.remove("hidden");
-      if(syncCurrentScore)syncCurrentScore.textContent=formatScore(finalScore);
-      if(syncFirstScore)syncFirstScore.textContent=result.result_first_score==null?"-":formatScore(result.result_first_score);
-      if(syncBestScore)syncBestScore.textContent=result.result_best_score==null?"-":formatScore(result.result_best_score);
-      if(syncPlayCount)syncPlayCount.textContent=result.result_play_count==null?"-":`${result.result_play_count}回`;
+      if(syncCurrentScore)syncCurrentScore.textContent=translator.t("currentScore",{score:translator.format(Number(finalScore||0))});
+      if(syncFirstScore)syncFirstScore.textContent=translator.t("firstScore",{score:result.result_first_score==null?"-":translator.format(Number(result.result_first_score))});
+      if(syncBestScore)syncBestScore.textContent=translator.t("bestScore",{score:result.result_best_score==null?"-":translator.format(Number(result.result_best_score))});
+      if(syncPlayCount)syncPlayCount.textContent=translator.t("playCount",{count:result.result_play_count==null?"-":translator.format(result.result_play_count)});
       const badges=[];
-      if(result.is_first_play)badges.push("初挑戦スコアを登録しました");
-      if(result.is_new_best)badges.push("自己ベスト更新！");
+      if(result.is_first_play)badges.push(translator.t("firstRecorded"));
+      if(result.is_new_best)badges.push(translator.t("newBest"));
       if(syncBadges)syncBadges.textContent=badges.join(" / ");
     }
     function renderRanking(){
@@ -368,17 +1982,18 @@
       bestRankingTab.classList.toggle("active",activeRankingType==="best");
       firstRankingTab.classList.toggle("active",activeRankingType==="first");
       rankingList.textContent="";
+      if(onlineDisplay.rank==="loading"||onlineDisplay.rank==="failed"){rankingStatus.textContent=translator.t(onlineDisplay.rank==="loading"?"loading":"syncFailed");return;}
       if(!rows||rows.length===0){
-        rankingStatus.textContent="ランキングはまだありません";
+        rankingStatus.textContent=translator.t("noRecords");
         return;
       }
       rankingStatus.textContent="";
-      rows.slice(0,3).forEach((row,index)=>{
+      rows.slice(0,30).forEach(row=>{
         const li=document.createElement("li");
         const name=document.createElement("span");
         const score=document.createElement("strong");
-        name.textContent=`${row.rank_no??index+1}位　${row.display_name||row.player_name||"名無し"}`;
-        score.textContent=formatScore(activeRankingType==="best"?(row.best_score??row.score??0):(row.first_score??row.score??0));
+        name.textContent=translator.t("rankName",{rank:Number.isSafeInteger(row.rank_no)&&row.rank_no>0?translator.format(row.rank_no):"—",name:row.display_name||row.player_name||translator.t("unnamed")});
+        score.textContent=formatRankingScore(activeRankingType==="best"?row.best_score:row.first_score);
         li.appendChild(name);
         li.appendChild(score);
         rankingList.appendChild(li);
@@ -388,8 +2003,8 @@
     function clearGameCache(){sessionStorage.removeItem("hima-tsu-bushi-current-game");localStorage.removeItem("hima-tsu-bushi-current-game")}
     function clearCountdown(){if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null}countdownOverlay.classList.add("hidden")}
     function resetStats(){plusScore=0;minusScore=0;totalScore=0;wallHits=0;paddleCatches=0;resultMessage="";ballBoostTimer=0;speedBoostTimer=0;effectParticles=[];items=[];itemCounts={addBall:0,shrinkPaddle:0,growPaddle:0,speedUpBall:0};resetRankingState()}
-    function startNewGame(){clearGameCache();clearCountdown();cancelAnimationFrame(animationId);resetStats();paddle=null;balls=[];blocks=[];items=[];gameState="countdown";pauseOverlay.classList.add("hidden");pauseButton.textContent="一時停止";showScreen("game");resizeCanvas();const w=Math.min(CONFIG.basePaddleWidth,W*.34);paddle={width:w,height:CONFIG.paddleHeight,x:W/2-w/2,y:H-CONFIG.paddleBottom-CONFIG.paddleHeight};balls=[createBall(W/2,paddle.y-14,-.55,-.85)];blocks=createBlocks();updateHud();draw();startCountdown()}
-    function startCountdown(){let count=3;countdownNumber.textContent=String(count);countdownOverlay.classList.remove("hidden");countdownTimer=setInterval(()=>{count-=1;if(count>0){countdownNumber.textContent=String(count);return}clearCountdown();gameState="playing";startLoop()},1000)}
+    function startNewGame(){playGeneration+=1;clearGameCache();clearCountdown();cancelAnimationFrame(animationId);resetStats();paddle=null;balls=[];blocks=[];items=[];gameState="countdown";pauseOverlay.classList.add("hidden");pauseButton.textContent=translator.t("pause");showScreen("game");resizeCanvas();const w=Math.min(CONFIG.basePaddleWidth,W*.34);paddle={width:w,height:CONFIG.paddleHeight,x:W/2-w/2,y:H-CONFIG.paddleBottom-CONFIG.paddleHeight};balls=[createBall(W/2,paddle.y-14,-.55,-.85)];blocks=createBlocks();updateHud();draw();startCountdown()}
+    function startCountdown(){let count=3;countdownNumber.textContent=translator.format(count);playEffect("countdown");countdownOverlay.classList.remove("hidden");countdownTimer=setInterval(()=>{count-=1;if(count>0){countdownNumber.textContent=translator.format(count);playEffect("countdown");return}clearCountdown();gameState="playing";playEffect("start");startLoop()},1000)}
     function createBall(x,y,nx,ny){const len=Math.hypot(nx,ny)||1;return{x,y,r:CONFIG.ballRadius,vx:nx/len*CONFIG.baseBallSpeed,vy:ny/len*CONFIG.baseBallSpeed}}
     function createBlocks(){const itemTotal=CONFIG.addBallBlocks+CONFIG.shrinkPaddleBlocks+CONFIG.growPaddleBlocks+CONFIG.speedUpBlocks;const effects=shuffle([...Array(CONFIG.addBallBlocks).fill("addBall"),...Array(CONFIG.shrinkPaddleBlocks).fill("shrinkPaddle"),...Array(CONFIG.growPaddleBlocks).fill("growPaddle"),...Array(CONFIG.speedUpBlocks).fill("speedUpBall"),...Array(CONFIG.blockCount-itemTotal).fill(null)]);const nonItemCount=CONFIG.blockCount-itemTotal;const normalNonItem=Math.max(0,CONFIG.normalHpBlocks-itemTotal);const hps=shuffle([...Array(normalNonItem).fill(1),...Array(CONFIG.hard2Blocks).fill(2),...Array(CONFIG.hard4Blocks).fill(4),...Array(Math.max(0,nonItemCount-normalNonItem-CONFIG.hard2Blocks-CONFIG.hard4Blocks)).fill(1)]);const areaH=Math.min(Math.max(H*.35,150),230);const bw=(W-CONFIG.blockSideGap*2-CONFIG.blockGap*(CONFIG.cols-1))/CONFIG.cols;const bh=Math.max(6,(areaH-CONFIG.blockGap*(CONFIG.rows-1))/CONFIG.rows);let hpIndex=0;return Array.from({length:CONFIG.blockCount},(_,i)=>{const col=i%CONFIG.cols,row=Math.floor(i/CONFIG.cols),effect=effects[i],maxHp=effect?1:hps[hpIndex++];return{x:CONFIG.blockSideGap+col*(bw+CONFIG.blockGap),y:CONFIG.blockTopGap+row*(bh+CONFIG.blockGap),width:bw,height:bh,hp:maxHp,maxHp,effect,pattern:Math.floor(Math.random()*COLORS.length),destroyed:false}})}
     function startLoop(){cancelAnimationFrame(animationId);lastFrameTime=performance.now();animationId=requestAnimationFrame(loop)}
@@ -443,6 +2058,7 @@
               paddleCatches+=1;
               minusScore-=10;
               updateTotalScore();
+              playEffect("paddle");
               paddlePenaltyAdded=true;
             }
           }
@@ -458,11 +2074,11 @@
 
       balls=balls.filter(ball=>ball.y-getBallHitRadius(ball)<=H);
       const lost=beforeCount-balls.length;
-      if(gameState==="playing"&&lost>0&&balls.length>0)ballBoostTimer+=CONFIG.lostBallBigSeconds*60*lost;
+      if(gameState==="playing"&&lost>0&&balls.length>0){playEffect("lost");ballBoostTimer+=CONFIG.lostBallBigSeconds*60*lost;}
       if(balls.length===0)finishGame()
     }
     function moveItems(delta){for(const item of items){item.y+=CONFIG.itemFallSpeed*delta;if(isItemTouchingPaddle(item)){applyItem(item.type);item.active=false}if(item.y>H+item.height)item.active=false}items=items.filter(item=>item.active)}
-    function hitBlock(ball,block){block.hp-=1;bounceBallFromBlock(ball,block);if(block.hp<=0){block.destroyed=true;plusScore+=CONFIG.blockBreakScore;updateTotalScore();if(block.effect)dropItem(block)}}
+    function hitBlock(ball,block){block.hp-=1;bounceBallFromBlock(ball,block);playEffect(block.hp<=0?"blockBreak":"blockHit");if(block.hp<=0){block.destroyed=true;plusScore+=CONFIG.blockBreakScore;updateTotalScore();if(block.effect)dropItem(block)}}
     function bounceBallFromBlock(ball,block){
       const radius=getBallHitRadius(ball);
       const prevX=typeof ball.prevX==="number"?ball.prevX:ball.x;
@@ -509,16 +2125,46 @@
       }
     }
     function dropItem(block){items.push({x:block.x+block.width/2-CONFIG.itemSize/2,y:block.y+block.height/2-CONFIG.itemSize/2,width:CONFIG.itemSize,height:CONFIG.itemSize,type:block.effect,active:true})}
-    function applyItem(type){if(!Object.prototype.hasOwnProperty.call(itemCounts,type))itemCounts[type]=0;itemCounts[type]+=1;if(type==="addBall"){const source=balls[0]||createBall(W/2,paddle.y-14,-.55,-.85);addBallFromSource(source);addBallFromSource(source);spawnSharkSweep();return}if(type==="shrinkPaddle"){const minW=CONFIG.basePaddleWidth*CONFIG.minPaddleRate;paddle.width=Math.max(minW,paddle.width*.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnBubbleRise();return}if(type==="growPaddle"){const maxW=CONFIG.basePaddleWidth*CONFIG.maxPaddleRate;paddle.width=Math.min(maxW,paddle.width*1.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnSharkSweep();return}if(type==="speedUpBall"){speedBoostTimer+=CONFIG.speedBoostSeconds*60;spawnBubbleRise()}}
+    function applyItem(type){if(["addBall","shrinkPaddle","growPaddle","speedUpBall"].includes(type))playEffect("item");if(!Object.prototype.hasOwnProperty.call(itemCounts,type))itemCounts[type]=0;itemCounts[type]+=1;if(type==="addBall"){const source=balls[0]||createBall(W/2,paddle.y-14,-.55,-.85);addBallFromSource(source);addBallFromSource(source);spawnSharkSweep();return}if(type==="shrinkPaddle"){const minW=CONFIG.basePaddleWidth*CONFIG.minPaddleRate;paddle.width=Math.max(minW,paddle.width*.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnBubbleRise();return}if(type==="growPaddle"){const maxW=CONFIG.basePaddleWidth*CONFIG.maxPaddleRate;paddle.width=Math.min(maxW,paddle.width*1.5);paddle.x=clamp(paddle.x,0,W-paddle.width);spawnSharkSweep();return}if(type==="speedUpBall"){speedBoostTimer+=CONFIG.speedBoostSeconds*60;spawnBubbleRise()}}
     function addBallFromSource(source){if(balls.length>=CONFIG.maxBalls)return;const speed=Math.hypot(source.vx,source.vy)||CONFIG.baseBallSpeed;const angle=-Math.PI/2+(Math.random()*1.2-.6);balls.push({x:source.x,y:source.y,r:CONFIG.ballRadius,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed})}
-    function addWallPenalty(){wallHits+=1;minusScore-=5;updateTotalScore()}
+    function addWallPenalty(){wallHits+=1;minusScore-=5;updateTotalScore();playEffect("wall")}
+    function unlockSound(){try{sound.unlock();}catch(_){}}
+    function updateSoundControls(){
+      for(const id of ["homeSound","resultSound"]){
+        $(id).textContent=translator.t(sound.isEnabled()?"soundOn":"soundOff");
+        $(id).setAttribute("aria-pressed",String(sound.isEnabled()));
+      }
+      for(const id of ["homeVolume","resultVolume"])$(id).value=String(Math.round(sound.getVolume()*100));
+    }
+    function wireAudioSettings(){
+      for(const id of ["homeSound","resultSound"])$(id).addEventListener("click",()=>{
+        sound.setEnabled(!sound.isEnabled());
+        updateSoundControls();
+        if(sound.isEnabled())unlockSound();
+      });
+      for(const id of ["homeVolume","resultVolume"])$(id).addEventListener("input",()=>{
+        sound.setVolume(Number($(id).value)/100);
+        updateSoundControls();
+      });
+      updateSoundControls();
+    }
+    function wireAudioLifecycle(){
+      app.addEventListener("pointerdown",event=>{
+        if(view!=="game"||event.target.closest(".audioSettings"))return;
+        unlockSound();
+      });
+      document.addEventListener("visibilitychange",()=>{if(document.hidden)sound.silence();});
+      window.addEventListener("pagehide",()=>sound.silence());
+    }
+    function playEffect(event){try{sound.play(event);}catch(_){}}
     function updateTotalScore(){totalScore=plusScore+minusScore}
-    function updateHud(){minusScoreEl.textContent=minusScore;totalScoreEl.textContent=totalScore}
-    function finishGame(){if(gameState==="ended")return;clearCountdown();gameState="ended";cancelAnimationFrame(animationId);setBestScore(totalScore);renderScore();showScreen("score");submitScoreAndLoadRankings()}
+    function updateHud(){minusScoreEl.textContent=translator.format(minusScore);totalScoreEl.textContent=translator.format(totalScore)}
+    function finishGame(){if(gameState==="ended")return;clearCountdown();gameState="ended";playEffect("finish");cancelAnimationFrame(animationId);setBestScore(totalScore);renderScore();showScreen("score");submitScoreAndLoadRankings()}
     function checkClear(){if(blocks.length>0&&blocks.every(block=>block.destroyed)){resultMessage="暇をつぶせたね🦈🫧";finishGame()}}
-    function renderScore(){updateTotalScore();resultMessageEl.textContent=resultMessage;resultMessageEl.classList.toggle("hidden",resultMessage==="");resultTotalEl.textContent=totalScore;resultWallHitsEl.textContent=wallHits;resultPaddleCatchesEl.textContent=paddleCatches;resultAddBallEl.textContent=itemCounts.addBall||0;resultShrinkEl.textContent=itemCounts.shrinkPaddle||0;resultGrowEl.textContent=itemCounts.growPaddle||0;resultSpeedEl.textContent=itemCounts.speedUpBall||0}
-    function pauseGame(){if(gameState!=="playing")return;gameState="paused";pauseButton.textContent="再開";pauseOverlay.classList.remove("hidden")}
-    function resumeGame(){if(gameState!=="paused")return;gameState="playing";pauseButton.textContent="一時停止";pauseOverlay.classList.add("hidden");startLoop()}
+    function renderScore(){updateTotalScore();paintScore()}
+    function paintScore(){resultMessageEl.textContent=resultMessage==="暇をつぶせたね🦈🫧"?translator.t("cleared"):resultMessage;resultMessageEl.classList.toggle("hidden",resultMessage==="");resultTotalEl.textContent=translator.format(totalScore);resultWallHitsEl.textContent=translator.format(wallHits);resultPaddleCatchesEl.textContent=translator.format(paddleCatches);resultAddBallEl.textContent=translator.format(itemCounts.addBall||0);resultShrinkEl.textContent=translator.format(itemCounts.shrinkPaddle||0);resultGrowEl.textContent=translator.format(itemCounts.growPaddle||0);resultSpeedEl.textContent=translator.format(itemCounts.speedUpBall||0)}
+    function pauseGame(){if(gameState!=="playing")return;unlockSound();playEffect("ui");gameState="paused";pauseButton.textContent=translator.t("resume");pauseOverlay.classList.remove("hidden")}
+    function resumeGame(){if(gameState!=="paused")return;unlockSound();playEffect("ui");gameState="playing";pauseButton.textContent=translator.t("pause");pauseOverlay.classList.add("hidden");startLoop()}
     function togglePause(){if(gameState==="playing")pauseGame();else if(gameState==="paused")resumeGame()}
     function draw(){if(!ctx||!paddle||!Array.isArray(blocks))return;ctx.clearRect(0,0,W,H);ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);drawBlocks();drawItems();drawBalls();drawPaddle();drawParticles()}
     function drawBlocks(){for(const block of blocks){if(block.destroyed)continue;const alpha=.35+.65*(block.hp/block.maxHp);ctx.globalAlpha=alpha;ctx.fillStyle=COLORS[block.pattern];roundRect(block.x,block.y,block.width,block.height,Math.min(5,block.height/2));ctx.globalAlpha=1;if(block.maxHp>1){ctx.fillStyle="rgba(0,0,0,.65)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(String(block.hp),block.x+block.width/2,block.y+block.height/2)}if(block.effect){ctx.fillStyle="#fff";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ITEM_LABELS[block.effect],block.x+block.width/2,block.y+block.height/2)}}}
@@ -581,19 +2227,31 @@
     function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
     function shuffle(array){const copied=[...array];for(let i=copied.length-1;i>0;i-=1){const j=Math.floor(Math.random()*(i+1));[copied[i],copied[j]]=[copied[j],copied[i]]}return copied}
     function preventBrowserGesture(event){if(view==="game")event.preventDefault()}
+    function shareFallbackLabel(){return HimaClient.shareFallbackLabel(currentLocale);}
+    function wireShareButton(button,screen){
+      const activate=HimaClient.createShareAction({
+        screen,getScreen:()=>view,isDisabled:()=>button.disabled,
+        getText:()=>HimaClient.shareText({screen,locale:currentLocale,score:totalScore}),
+        now:()=>Date.now(),openPopup:(url,target)=>window.open(url,target),
+        fallback:text=>window.prompt(shareFallbackLabel(),text)
+      });
+      button.addEventListener("click",activate);
+    }
     function currentUrl(){return GAME_URL || location.href.split("#")[0]}
     async function copyText(text,useNativeShare=false){try{if(useNativeShare&&navigator.share){await navigator.share({text});return}if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}else{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");document.body.removeChild(ta)}showToast("クリップボードにコピーしました")}catch(e){if(e&&e.name==="AbortError")return;console.error("share or copy failed",e);showToast("コピーできませんでした")}}
     function showToast(message){toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),1000)}
     function buildGameShareText(){return `${GAME_TITLE}で遊んでみて！\n${PUBLIC_URL}`}
     function buildScoreShareText(){const first=scoreSubmitResult&&scoreSubmitResult.result_first_score!=null?`\n初回挑戦スコア：${scoreSubmitResult.result_first_score}点`:"";const best=scoreSubmitResult&&scoreSubmitResult.result_best_score!=null?`\n最高スコア：${scoreSubmitResult.result_best_score}点`:"";return `${GAME_TITLE}で ${totalScore}点！${first}${best}\n${PUBLIC_URL}`}
-    startGameButton.addEventListener("click",requestGameStart);
-    confirmNameButton.addEventListener("click",confirmPlayerName);
-    cancelNameButton.addEventListener("click",()=>showScreen("home"));
-    playerNameInput.addEventListener("keydown",event=>{if(event.key==="Enter")confirmPlayerName()});
+    playerNameInput.value=getSavedPlayerName();
+    wireLanguageControls();
+    wireStartControls();
+    wireAudioSettings();
+    wireAudioLifecycle();
+    wireRankingRetryControl();
     bestRankingTab.addEventListener("click",()=>{activeRankingType="best";renderRanking()});
     firstRankingTab.addEventListener("click",()=>{activeRankingType="first";renderRanking()});
-    shareGameButton.addEventListener("click",()=>copyText(buildGameShareText(),true));
-    shareScoreButton.addEventListener("click",()=>copyText(buildScoreShareText(),true));
+    wireShareButton(shareGameButton,"home");
+    wireShareButton(shareScoreButton,"score");
     pauseButton.addEventListener("click",togglePause);
     pauseButton.addEventListener("touchstart",event=>event.stopPropagation(),{passive:true});
 
