@@ -11,9 +11,9 @@ const html=bytes.toString('utf8');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'publish-manifest.json'),'utf8'));
 const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 test('the public candidate preserves the reviewed runtime bytes',()=>{
-  assert.deepEqual(manifest.runtimeFiles,['index.html']);
+  assert.deepEqual(manifest.runtimeFiles,['index.html','social-card.jpg']);
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.runtimeSHA256);
-  assert.equal(manifest.runtimeSHA256,'93475a7b2c7bcd0288056fed22cf93094e6ee91d236a620dded8f9ef4b87eba4');
+  assert.equal(manifest.runtimeSHA256,'7c8588a7d4ca0961d68cdac319f7cdbdc525c5cbf38a731c870074ab5d5177ac');
 });
 test('standalone editable sources match the scripts actually included in the page',()=>{
   for(const [id,file] of Object.entries(manifest.inlineSources)){
@@ -43,13 +43,28 @@ test('15 catalogs of 77 keys and unchanged game identity are explicit',()=>{
   assert.equal(manifest.title,'暇をつぶそう');
   assert.ok(html.includes('<title>🦈暇をつぶそう🫧</title>'));
 });
-test('missing social image is pending, never a declared broken local asset',()=>{
-  const images=[...html.matchAll(/<meta\b[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*>/g)];
-  if(images.length===0){assert.equal(manifest.thumbnail.status,'pending');assert.ok(manifest.thumbnail.reason);return;}
-  for(const match of images){
-    const content=/\bcontent=["']([^"']+)["']/.exec(match[0]);assert.ok(content,'declared image must have a nonempty content');
-    assert.ok(!/^(?:https?:)?\/\//.test(content[1]),'remote assets need separate verified publication review');
-    const target=path.resolve(root,content[1]);assert.ok(target.startsWith(root+path.sep),'image must be within the publication root');
-    assert.ok(fs.statSync(target).isFile(),'declared image file must exist');
+test('canonical share page declares its exact versioned publication asset for OG and X',()=>{
+  const canonical='https://chameleonjp-lab.github.io/himatubushi/';
+  const image=canonical+'social-card.jpg';
+  assert.equal(manifest.canonicalURL,canonical);
+  assert.equal(manifest.thumbnail.status,'prepared-pending-publication');
+  const entries=[
+    ['rel','canonical','href',canonical],
+    ['property','og:url','content',canonical],
+    ['property','og:image','content',image],
+    ['name','twitter:image','content',image],
+    ['name','twitter:card','content','summary_large_image'],
+    ['property','og:image:type','content','image/jpeg'],
+    ['property','og:image:width','content','1200'],
+    ['property','og:image:height','content','630']
+  ];
+  for(const [a,k,b,v] of entries){
+    assert.equal(html.split(a+'="'+k+'" '+b+'="'+v+'"').length,2,k);
   }
+  assert.equal(require('../client-core.cjs').publicUrl,canonical);
+  assert.ok(html.includes('const PUBLIC_URL="'+canonical+'";'));
+  const imageBytes=fs.readFileSync(path.join(root,'social-card.jpg'));
+  const baseline=Buffer.from([255,192,0,17,8,2,118,4,176,3]);
+  assert.ok(imageBytes.includes(baseline),'1200 by 630 baseline JPEG');
+  assert.equal(crypto.createHash('sha256').update(imageBytes).digest('hex'),manifest.thumbnail.sha256);
 });
