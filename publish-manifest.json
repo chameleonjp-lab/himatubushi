@@ -1,8 +1,11 @@
 {
   "repository": "chameleonjp-lab/himatubushi",
   "title": "暇をつぶそう",
-  "runtimeFiles": ["index.html"],
-  "runtimeSHA256": "93475a7b2c7bcd0288056fed22cf93094e6ee91d236a620dded8f9ef4b87eba4",
+  "runtimeFiles": [
+    "index.html",
+    "social-card.jpg"
+  ],
+  "runtimeSHA256": "7c8588a7d4ca0961d68cdac319f7cdbdc525c5cbf38a731c870074ab5d5177ac",
   "inlineSources": {
     "hima-client": "client-core.cjs",
     "hima-audio": "audio.cjs",
@@ -10,9 +13,18 @@
     "normal-score-ack8": "normal-score-ack8.js",
     "hima-catalog": "locales.json"
   },
-  "externalRuntime": ["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"],
-  "thumbnail": {"status": "pending", "reason": "An actual-game screenshot and social metadata will be reviewed after publication. No fabricated image is declared."},
-  "canonicalURL": "https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/",
-  "canonicalSwitch": "Only after the owner merges, Pages publishes and the actual new game URL is verified.",
-  "deployment": "No workflow is added. The owner must confirm the existing Pages source and publication settings before merging."
+  "externalRuntime": [
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ],
+  "thumbnail": {
+    "status": "prepared-pending-publication",
+    "file": "social-card.jpg",
+    "mimeType": "image/jpeg",
+    "width": 1200,
+    "height": 630,
+    "sha256": "ed89d6020bccd48d30db525df6347c15a61f63a1174de1c0306d7347eb65d805"
+  },
+  "canonicalURL": "https://chameleonjp-lab.github.io/himatubushi/",
+  "canonicalSwitch": "The Lab keeps the Codeberg URL until the owner merges and publishes this exact GitHub Pages build, then the new game URL and image are verified anonymously.",
+  "deployment": "No workflow is added. The owner must confirm the existing Pages source and publication settings, and publish the verified content."
 }

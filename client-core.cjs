@@ -39,7 +39,7 @@
     const displayName=capped.replace(/[\uD800-\uDBFF]$/,'');
     return Object.freeze({displayName,participates:displayName.length>0});
   }
-  const publicUrl='https://chameleonjp.codeberg.page/nayuta_no_himatsubushi/';
+  const publicUrl='https://chameleonjp-lab.github.io/himatubushi/';
   const tags='#暇をつぶそう #ゲーム制作';
   const messages=Object.freeze({
     ja:['暇をつぶそう：バーで球を跳ね返し、200個のブロックを壊そう！壁とバーでの減点に注意。','暇をつぶそうで {score} 点！'],
