@@ -5,7 +5,7 @@
     "index.html",
     "social-card.jpg"
   ],
-  "runtimeSHA256": "195da3cc1410e1a374cd542d06bfdaf236afdeba50612e20098fa85cfc9bfa0b",
+  "runtimeSHA256": "53588185d1eb58059a62157cdfba94dbc652b6edeb454a6207521f952316a9e8",
   "inlineSources": {
     "hima-client": "client-core.cjs",
     "hima-audio": "audio.cjs",
