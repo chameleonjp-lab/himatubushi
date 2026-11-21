@@ -17,12 +17,15 @@
   function languageFromLocale(value){
     const raw=String(value||'').trim().replace(/_/g,'-').toLowerCase();
     if(!raw)return null;
-    if(raw.startsWith('zh')){
-      if(raw.includes('hant'))return 'zh-Hant';
-      if(raw.includes('hans'))return 'zh-Hans';
-      return /(?:^|-)(tw|hk|mo)(?:-|$)/.test(raw)?'zh-Hant':'zh-Hans';
+    const parts=raw.split('-');
+    const base=parts[0];
+    if(base==='zh'){
+      const extension=parts.findIndex((part,index)=>index>0&&part.length===1);
+      const core=extension<0?parts:parts.slice(0,extension);
+      const script=core.find(part=>part==='hans'||part==='hant');
+      if(script)return script==='hant'?'zh-Hant':'zh-Hans';
+      return core.some(part=>['tw','hk','mo'].includes(part))?'zh-Hant':'zh-Hans';
     }
-    const base=raw.split('-')[0];
     if(base==='pt')return 'pt-BR';
     return isSupported(base)?base:null;
   }
