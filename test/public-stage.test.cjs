@@ -13,7 +13,7 @@ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 test('the public candidate preserves the reviewed runtime bytes',()=>{
   assert.deepEqual(manifest.runtimeFiles,['index.html','social-card.jpg']);
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.runtimeSHA256);
-  assert.equal(manifest.runtimeSHA256,'3560f7352cb65a4d25e886b84640075c8a8add2c3b2585b6d5a04e2ffd27808a');
+  assert.equal(manifest.runtimeSHA256,'03a9918c5b16b4f3502fe50c4e5b75151f4c1cf1d0efec06dc4243c371cb495f');
 });
 test('standalone editable sources match the scripts actually included in the page',()=>{
   for(const [id,file] of Object.entries(manifest.inlineSources)){
@@ -67,4 +67,32 @@ test('canonical share page declares its exact versioned publication asset for OG
   const baseline=Buffer.from([255,192,0,17,8,2,118,4,176,3]);
   assert.ok(imageBytes.includes(baseline),'1200 by 630 baseline JPEG');
   assert.equal(crypto.createHash('sha256').update(imageBytes).digest('hex'),manifest.thumbnail.sha256);
+});
+test('home and score expose native links to the established experiment leaderboard',()=>{
+  const href='https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=nayuta_no_himatsubushi';
+  const sections=[
+    ['homeScreen','nameScreen','homeRankingLink'],
+    ['scoreScreen','toast','scoreRankingLink']
+  ];
+  for(const [start,end,id] of sections){
+    const i=html.indexOf('id="'+start+'"');
+    assert.ok(i>=0,start);
+    let j=html.indexOf('id="'+end+'"',i+1);
+    if(j<0)j=html.indexOf('</main>',i+1);
+    assert.ok(j>i,end);
+    const view=html.slice(i,j);
+    const matches=[...view.matchAll(/<a\b[^>]*><\/a>|<a\b[^>]*>[^<]+<\/a>/g)];
+    const links=matches.map(x=>x[0]).filter(x=>x.includes('id="'+id+'"'));
+    assert.equal(links.length,1,id);
+    assert.ok(links[0].includes('href="'+href+'"'));
+    assert.ok(links[0].includes('data-i18n="ranking"'));
+    assert.ok(links[0].endsWith('>ランキング</a>'));
+    assert.ok(links[0].includes('target="_blank" rel="noopener noreferrer"'));
+    assert.ok(!/\b(?:onclick|hidden|aria-disabled|tabindex)=/.test(links[0]));
+    if(start==='scoreScreen')assert.ok(view.indexOf(links[0])>view.indexOf('id="finishButton"')&&view.indexOf(links[0])<view.indexOf('id="scoreSyncCard"'));
+  }
+  const catalog=JSON.parse(fs.readFileSync(path.join(root,'locales.json'),'utf8'));
+  assert.equal(Object.keys(catalog).length,15);
+  assert.ok(Object.values(catalog).every(row=>typeof row.ranking==='string'&&row.ranking.trim()));
+  assert.match(html,/\.ranking-detail-link:focus-visible\s*\{/);
 });
