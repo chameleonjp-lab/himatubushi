@@ -2248,12 +2248,38 @@ function validateNormalScoreAck8(data, expected) {
     function shuffle(array){const copied=[...array];for(let i=copied.length-1;i>0;i-=1){const j=Math.floor(Math.random()*(i+1));[copied[i],copied[j]]=[copied[j],copied[i]]}return copied}
     function preventBrowserGesture(event){if(view==="game")event.preventDefault()}
     function shareFallbackLabel(){return HimaClient.shareFallbackLabel(currentLocale);}
+    function showShareCopyFallback(text,label,button){
+      const dialog=document.createElement('dialog');
+      dialog.setAttribute('aria-label',label);
+      dialog.style.width='min(28rem, calc(100vw - 2rem))';
+      const field=document.createElement('textarea');
+      field.setAttribute('aria-label',label);
+      field.value=text;
+      field.readOnly=true;
+      field.rows=7;
+      field.style.boxSizing='border-box';
+      field.style.width='100%';
+      const close=document.createElement('button');
+      close.type='button';
+      const closeLabels={"ja":"閉じる","en":"Close","es":"Cerrar","pt-BR":"Fechar","zh-Hans":"关闭","fr":"Fermer","de":"Schließen","ko":"닫기","ru":"Закрыть","it":"Chiudi","zh-Hant":"關閉","id":"Tutup","tr":"Kapat","vi":"Đóng","th":"ปิด"};
+      close.textContent=closeLabels[currentLocale]||closeLabels.en;
+      close.addEventListener('click',()=>dialog.close());
+      dialog.addEventListener('close',()=>{
+        dialog.remove();
+        button.focus({preventScroll:true});
+      },{once:true});
+      dialog.append(field,close);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      field.focus({preventScroll:true});
+      field.select();
+    }
     function wireShareButton(button,screen){
       const activate=HimaClient.createShareAction({
         screen,getScreen:()=>view,isDisabled:()=>button.disabled,
         getText:()=>HimaClient.shareText({screen,locale:currentLocale,score:totalScore}),
-        now:()=>Date.now(),openPopup:(url,target)=>window.open(url,target),
-        fallback:text=>window.prompt(shareFallbackLabel(),text)
+        now:()=>Date.now(),openPopup:(url,target)=>{const popup=window.open(url,target);return popup&&!popup.closed?popup:null;},
+        fallback:text=>showShareCopyFallback(text,shareFallbackLabel(),button)
       });
       button.addEventListener("click",activate);
     }
