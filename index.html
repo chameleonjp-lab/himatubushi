@@ -40,6 +40,9 @@
     .secondary-button.x-share-button{background:#000;color:#fff;min-height:44px}
     .audioSettings{display:grid;grid-template-columns:minmax(100px,1fr) auto minmax(80px,1fr);gap:8px;align-items:center;margin-top:12px}.audioSettings button,.audioSettings input{min-height:44px;min-width:0}.audioSettings input{width:100%}
     .home-actions,.score-actions{display:grid;gap:10px;margin-top:12px}
+    .ranking-detail-link{display:flex;align-items:center;justify-content:center;min-height:44px;text-align:center;white-space:normal;overflow-wrap:anywhere;text-decoration:none}
+    .ranking-detail-link:focus-visible{outline:3px solid #56bdfd;outline-offset:3px}
+    .ranking-detail-result{margin-top:12px}
     .name-screen{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .name-card{width:min(100%,420px);min-height:calc(var(--app-height) - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin:0 auto;display:flex;flex-direction:column;justify-content:center}
     .name-card p{color:rgba(255,255,255,.78);line-height:1.55}
@@ -123,6 +126,7 @@
         <div class="home-actions">
           <button id="startGameButton" class="primary-button" type="button" data-i18n="start">ゲーム開始</button>
           <button id="shareGameButton" class="secondary-button x-share-button" type="button" data-i18n="share">Xでシェア</button>
+          <a id="homeRankingLink" class="secondary-button ranking-detail-link" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=nayuta_no_himatsubushi" target="_blank" rel="noopener noreferrer" data-i18n="ranking">ランキング</a>
         </div>
 
         <section class="rule-card" aria-label="ルール説明" data-i18n-aria="rulesTitle">
@@ -188,6 +192,8 @@
           <button id="restartButton" class="primary-button" type="button" data-i18n="restart">ゲーム再開</button>
           <button id="finishButton" class="secondary-button" type="button" data-i18n="home">終了</button>
         </div>
+
+        <div class="ranking-detail-result"><a id="scoreRankingLink" class="secondary-button ranking-detail-link" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=nayuta_no_himatsubushi" target="_blank" rel="noopener noreferrer" data-i18n="ranking">ランキング</a></div>
 
         <section id="scoreSyncCard" class="score-extra-card hidden" aria-label="ランキング送信結果" data-i18n-aria="syncLabel">
           <h2 data-i18n="syncTitle">ランキング連携</h2>
