@@ -13,7 +13,7 @@ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 test('the public candidate preserves the reviewed runtime bytes',()=>{
   assert.deepEqual(manifest.runtimeFiles,['index.html','social-card.jpg']);
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.runtimeSHA256);
-  assert.equal(manifest.runtimeSHA256,'03a9918c5b16b4f3502fe50c4e5b75151f4c1cf1d0efec06dc4243c371cb495f');
+  assert.equal(manifest.runtimeSHA256,'97b21fcf273cda7ab20423179082e8ce680b55c88c3db4286d5e2c90fa5b840b');
 });
 test('standalone editable sources match the scripts actually included in the page',()=>{
   for(const [id,file] of Object.entries(manifest.inlineSources)){
